@@ -69,15 +69,4 @@ public class ApplicationUser implements UserDetails {
         return isEnabled;
     }
 
-    public static ApplicationUser empty() {
-        return new ApplicationUser(
-                "",
-                "",
-                List.of(),
-                true,
-                true,
-                true,
-                true
-        );
-    }
 }
