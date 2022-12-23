@@ -36,32 +36,32 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    @PreAuthorize("hasAnyRole('ADMIN','MEMBER')")
+    @PreAuthorize("hasAuthority('self:write')")
     public ResponseEntity<Message> updateUserPassword(@Valid @RequestBody UpdatePasswordForm form, Principal principal) {
         return userService.updateUserPassword(form, principal.getName());
     }
 
     @PutMapping("/role")
-    @PreAuthorize(ADMIN)
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<Message> updateUserRole(@Valid @RequestBody UpdateRoleForm form) {
         return userService.updateUserRole(form.getUsername(), form.getRole());
     }
 
     @GetMapping("{username}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
+    @PreAuthorize("hasAuthority('user:read')")
     public UserDto getUserByUsername(@PathVariable(value = "username") String username) {
         return userService.getUserByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     @DeleteMapping("{username}")
-    @PreAuthorize(ADMIN)
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<Message> deleteUser(@PathVariable(value = "username") String username) {
         return userService.deleteUser(username);
     }
 
     @DeleteMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
+    @PreAuthorize("hasAuthority('self:write')")
     public ResponseEntity<Message> deleteUser(Principal principal) {
         return userService.deleteUser(principal.getName());
     }
