@@ -1,8 +1,8 @@
 package com.voidhub.api.event;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.voidhub.api.user.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +13,7 @@ import java.util.UUID;
 @Table(name = "events")
 @Getter
 @Setter
+@Builder
 public class Event {
 
     @Id
@@ -20,7 +21,7 @@ public class Event {
     private UUID id;
 
     @Column(nullable = false)
-    private String name;
+    private String title;
 
     @Column(nullable = false)
     private String shortDescription;
@@ -40,10 +41,7 @@ public class Event {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User creator;
 
-    @JsonProperty("creator")
-    private String getCreatorUsername() {
-        return creator.getUsername();
-    }
+    public Event() {}
 
     @Override
     public String toString() {
