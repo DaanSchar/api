@@ -24,7 +24,6 @@ public class GetUsersTest {
     @Value("${local.server.port}")
     private int port;
 
-
     @BeforeEach
     public void setUp() {
         userRepository.deleteAll();
