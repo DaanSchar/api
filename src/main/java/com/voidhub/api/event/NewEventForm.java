@@ -1,9 +1,15 @@
 package com.voidhub.api.event;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@Builder
 public class NewEventForm {
 
     @Size(min = 3, max = 50, message = "Title must be between 3 and 50 characters")
