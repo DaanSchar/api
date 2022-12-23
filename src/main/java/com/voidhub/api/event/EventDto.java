@@ -14,10 +14,10 @@ public class EventDto {
         this.title = event.getTitle();
         this.shortDescription = event.getShortDescription();
         this.fullDescription = event.getFullDescription();
-        this.creationDate = event.getCreationDate();
+        this.creationDate = event.getCreatedAt();
         this.applicationDeadline = event.getApplicationDeadline();
         this.startingDate = event.getStartingDate();
-        this.creator = new UserDto(event.getCreator());
+        this.creator = new UserDto(event.getPublishedBy());
     }
 
     private String title;
