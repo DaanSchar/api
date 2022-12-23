@@ -16,13 +16,15 @@ public enum Role {
     EventHost(
             "ROLE_EVENT_HOST",
             "self:write",
-            "user:read"
+            "user:read",
+            "event:write"
     ),
     ADMIN(
             "ROLE_ADMIN",
             "self:write",
             "user:read",
-            "user:write"
+            "user:write",
+            "event:write"
     );
 
     private final List<SimpleGrantedAuthority> authorities;
