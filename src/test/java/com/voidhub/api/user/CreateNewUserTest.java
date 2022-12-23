@@ -1,7 +1,6 @@
-package com.voidhub.api.user.endpoints;
+package com.voidhub.api.user;
 
 
-import com.voidhub.api.user.*;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;

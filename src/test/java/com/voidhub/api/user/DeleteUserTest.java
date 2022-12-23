@@ -1,9 +1,6 @@
-package com.voidhub.api.user.endpoints;
+package com.voidhub.api.user;
 
-import com.voidhub.api.user.Role;
-import com.voidhub.api.user.User;
-import com.voidhub.api.user.UserRepository;
-import com.voidhub.api.user.Util;
+import com.voidhub.api.Util;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

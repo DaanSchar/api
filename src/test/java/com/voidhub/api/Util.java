@@ -1,4 +1,4 @@
-package com.voidhub.api.user;
+package com.voidhub.api;
 
 import io.restassured.RestAssured;
 
