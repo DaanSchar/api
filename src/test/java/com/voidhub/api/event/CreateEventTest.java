@@ -44,8 +44,11 @@ public class CreateEventTest {
     @BeforeEach
     public void beforeEach() {
         RestAssured.port = port;
-        userRepository.deleteAll();
+
+        // order matters here. cannot delete users if events still exist,
+        // as there is a foreign key constraint
         eventRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
