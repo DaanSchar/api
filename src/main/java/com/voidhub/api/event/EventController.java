@@ -26,7 +26,7 @@ public class EventController {
     }
 
     @GetMapping
-    public List<Event> getEvents() {
+    public List<EventDto> getEvents() {
         return eventService.getEvents();
     }
 
@@ -43,7 +43,7 @@ public class EventController {
     }
 
     @GetMapping("{eventId}")
-    public Event getEvent(@PathVariable(name = "eventId") UUID eventId) {
+    public EventDto getEvent(@PathVariable(name = "eventId") UUID eventId) {
         return eventService.getEvent(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
     }

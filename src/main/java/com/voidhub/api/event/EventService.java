@@ -28,12 +28,15 @@ public class EventService {
         this.userRepository = userRepository;
     }
 
-    public List<Event> getEvents() {
-        return eventRepository.findAll(Sort.by("startingDate"));
+    public List<EventDto> getEvents() {
+        return eventRepository.findAll(Sort.by("startingDate"))
+                .stream()
+                .map(EventDto::new)
+                .toList();
     }
 
-    public Optional<Event> getEvent(UUID eventId) {
-        return eventRepository.findById(eventId);
+    public Optional<EventDto> getEvent(UUID eventId) {
+        return eventRepository.findById(eventId).map(EventDto::new);
     }
 
     public ResponseEntity<Message> createNewEvent(NewEventForm form, String username) throws URISyntaxException {
