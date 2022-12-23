@@ -2,10 +2,8 @@ package com.voidhub.api.auth;
 
 import com.voidhub.api.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository("real")
@@ -26,7 +24,7 @@ public class RealApplicationUserDaoService implements ApplicationUserDao {
                         new ApplicationUser(
                                 existingUser.getUsername(),
                                 existingUser.getPassword(),
-                                List.of(new SimpleGrantedAuthority(existingUser.getRole().toString())),
+                                existingUser.getRole().getAuthorities(),
                                 true,
                                 true,
                                 true,
