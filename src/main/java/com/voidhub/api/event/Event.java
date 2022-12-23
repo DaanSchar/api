@@ -2,6 +2,7 @@ package com.voidhub.api.event;
 
 import com.voidhub.api.user.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Table(name = "events")
 @Getter
 @Setter
+@AllArgsConstructor
 public class Event {
 
     @Id

@@ -14,19 +14,19 @@ public class EventDto {
         this.title = event.getTitle();
         this.shortDescription = event.getShortDescription();
         this.fullDescription = event.getFullDescription();
-        this.creationDate = event.getCreatedAt();
+        this.createdAt = event.getCreatedAt();
         this.applicationDeadline = event.getApplicationDeadline();
         this.startingDate = event.getStartingDate();
-        this.creator = new UserDto(event.getPublishedBy());
+        this.publishedBy = new UserDto(event.getPublishedBy());
     }
 
     private String title;
     private UUID id;
     private String shortDescription;
     private String fullDescription;
-    private Date creationDate;
+    private Date createdAt;
     private Date applicationDeadline;
     private Date startingDate;
-    private UserDto creator;
+    private UserDto publishedBy;
 
 }
