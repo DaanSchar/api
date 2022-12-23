@@ -30,7 +30,8 @@ public class PasswordConstraintTest {
             "invalid_invalid_invalid_invalid_invalid_invalid",
             "woah",
             "inv",
-            "Woah123ThisPasswordIsInvalid"
+            "Woah123ThisPasswordIsInvalid",
+            ""
     );
 
     @Test

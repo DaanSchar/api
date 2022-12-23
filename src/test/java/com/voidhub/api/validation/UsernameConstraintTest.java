@@ -36,7 +36,8 @@ public class UsernameConstraintTest {
             "invalid#user8",
             "invalid$user",
             "invalid%user",
-            "abc"
+            "abc",
+            ""
     );
 
     @Test
