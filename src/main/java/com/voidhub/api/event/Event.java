@@ -2,9 +2,10 @@ package com.voidhub.api.event;
 
 import com.voidhub.api.user.User;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.UUID;
@@ -13,7 +14,6 @@ import java.util.UUID;
 @Table(name = "events")
 @Getter
 @Setter
-@Builder
 public class Event {
 
     @Id
@@ -30,18 +30,32 @@ public class Event {
     private String fullDescription;
 
     @Column(nullable = false)
-    private Date creationDate;
-
-    @Column(nullable = false)
     private Date applicationDeadline;
 
     @Column(nullable = false)
     private Date startingDate;
 
+    @Column(nullable = false)
+    @CreationTimestamp
+    private Date createdAt;
+
+    @Column(nullable = false)
+    @UpdateTimestamp
+    private Date updateAt;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    private User creator;
+    private User publishedBy;
 
     public Event() {}
+
+    public Event(NewEventForm form, User publishedBy) {
+        this.title = form.getTitle();
+        this.shortDescription = form.getShortDescription();
+        this.fullDescription = form.getFullDescription();
+        this.applicationDeadline = form.getApplicationDeadline();
+        this.startingDate = form.getStartingDate();
+        this.publishedBy = publishedBy;
+    }
 
     @Override
     public String toString() {
@@ -49,9 +63,9 @@ public class Event {
                 "id=" + id +
                 ", shortDesc=" + shortDescription +
                 ", fullDesc=" + fullDescription +
-                ", creationDate=" + creationDate +
+                ", creationDate=" + createdAt +
                 ", applicationDeadline=" + applicationDeadline +
                 ", startingDate=" + startingDate +
-                ", creator=" + creator + "}";
+                ", creator=" + publishedBy + "}";
     }
 }
