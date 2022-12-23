@@ -1,10 +1,16 @@
 package com.voidhub.api.event;
 
+import com.voidhub.api.user.User;
+import com.voidhub.api.user.UserRepository;
+import com.voidhub.api.util.Message;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,9 +20,12 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
+    private final UserRepository userRepository;
+
     @Autowired
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Event> getEvents() {
@@ -27,15 +36,18 @@ public class EventService {
         return eventRepository.findById(eventId);
     }
 
-    public void createNewEvent(Event event) {
-        if (event.getCreationDate() == null) {
-            event.setCreationDate(new Date());
-        }
+    public ResponseEntity<Message> createNewEvent(NewEventForm form, String username) throws URISyntaxException {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-        event.setApplicationDeadline(new Date());
-        event.setStartingDate(new Date());
 
-        eventRepository.save(event);
+        Event newEvent = eventRepository.save(
+                new Event(form, user)
+        );
+
+        return ResponseEntity
+                .created(new URI("/api/v1/events/" + newEvent.getId()))
+                .body(new Message("Successfully created event"));
     }
 
     //TODO: Horrible solution, fix it
@@ -45,8 +57,8 @@ public class EventService {
         event.setId(eventId);
         eventRepository.findById(eventId).ifPresentOrElse(
                 e -> {
-                    if (event.getCreationDate() == null) {
-                        event.setCreationDate(e.getCreationDate());
+                    if (event.getCreatedAt() == null) {
+                        event.setCreatedAt(e.getCreatedAt());
                     }
                     if (event.getApplicationDeadline() == null) {
                         event.setApplicationDeadline(e.getApplicationDeadline());
@@ -54,8 +66,8 @@ public class EventService {
                     if (event.getStartingDate() == null) {
                         event.setStartingDate(e.getStartingDate());
                     }
-                    if (event.getCreator() == null) {
-                        event.setCreator(e.getCreator());
+                    if (event.getPublishedBy() == null) {
+                        event.setPublishedBy(e.getPublishedBy());
                     }
                     if (event.getFullDescription() == null) {
                         event.setFullDescription(e.getFullDescription());

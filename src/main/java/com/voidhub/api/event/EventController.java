@@ -1,12 +1,15 @@
 package com.voidhub.api.event;
 
-import com.voidhub.api.user.UserService;
+import com.voidhub.api.util.Message;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -15,15 +18,11 @@ import java.util.UUID;
 @RequestMapping("/api/v1/events")
 public class EventController {
 
-    private static final String ADMIN = "hasRole('ADMIN')";
-    private static final String MEMBER = "hasRole('MEMBER')";
     private final EventService eventService;
-    private final UserService userService;
 
     @Autowired
-    public EventController(EventService eventService, UserService userService) {
+    public EventController(EventService eventService) {
         this.eventService = eventService;
-        this.userService = userService;
     }
 
     @GetMapping
@@ -32,12 +31,9 @@ public class EventController {
     }
 
     @PostMapping
-    @PreAuthorize(MEMBER)
-    public void createNewEvent(@RequestBody Event event, Principal principal) {
-//        UserDto user = userService.getUserByUsername(principal.getName())
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid token"));
-//        event.setCreator(user);
-//        eventService.createNewEvent(event);
+    @PreAuthorize("hasAuthority('event:write')")
+    public ResponseEntity<Message> createNewEvent(@Valid @RequestBody NewEventForm form, Principal principal) throws URISyntaxException {
+        return eventService.createNewEvent(form, principal.getName());
     }
 
     @PutMapping("{eventId}")
