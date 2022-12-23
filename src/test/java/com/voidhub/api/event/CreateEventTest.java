@@ -1,20 +1,15 @@
 package com.voidhub.api.event;
 
 
-import com.voidhub.api.Util;
-import com.voidhub.api.user.Role;
-import com.voidhub.api.user.User;
-import com.voidhub.api.user.UserRepository;
+import com.voidhub.api.*;
+import com.voidhub.api.user.*;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Date;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
@@ -35,63 +30,118 @@ public class CreateEventTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private final String eventWriteAuth = "event:write";
+    private static String username;
+    private static String password;
+
+    @BeforeAll
+    public static void beforeAll() {
+        username = UUID.randomUUID().toString();
+        password = UUID.randomUUID().toString();
+        RestAssured.baseURI = "http://localhost";
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        RestAssured.port = port;
+        userRepository.deleteAll();
+        eventRepository.deleteAll();
+    }
+
     @Test
-    public void adminCreatesNewEventReturnsOkWithId() {
-        userRepository.save(User.builder()
-                .role(Role.ADMIN)
-                .password(passwordEncoder.encode("password"))
-                .username("username")
+    public void roleWithWriteEventAuthorityExists() {
+        Assertions.assertTrue(Util.getRoleWithAuthority(eventWriteAuth).size() > 0);
+    }
+
+    @Test
+    public void rolesWithoutWriteEventAuthorityExist() {
+        Assertions.assertTrue(Util.getRoleWithoutAuthority(eventWriteAuth).size() > 0);
+    }
+
+    @Test
+    public void userWithEventWriteAuthority_CreatesNewEvent_ReturnsOkWithId() {
+        for (Role role : Util.getRoleWithAuthority(eventWriteAuth)) {
+            eventRepository.deleteAll();
+
+            buildAndWriteUser(role);
+            var eventForm = buildEventForm();
+
+            var result = RestAssured.given()
+                    .given()
+                    .header("Authorization", Util.getToken(username, password, port))
+                    .contentType("application/json")
+                    .body(Util.toBody(eventForm))
+                    .when()
+                    .post("/api/v1/events")
+                    .then();
+            result
+                    .statusCode(201)
+                    .body("message", equalTo("Successfully created event"));
+
+            Assertions.assertEquals(1, eventRepository.findAll().size());
+
+            UUID id = eventRepository.findAll().get(0).getId();
+
+            result.header("Location", equalTo("/api/v1/events/" + id));
+        }
+    }
+
+    @Test
+    public void userWithEventWriteAuthority_CreatesNewEventWithInvalidDate_Returns422() {
+        Assertions.assertTrue(Util.roleWithAuthorityExists(eventWriteAuth));
+
+        for (Role role : Util.getRoleWithAuthority(eventWriteAuth)) {
+            buildAndWriteUser(role);
+            RestAssured.given()
+                    .given()
+                    .header("Authorization", Util.getToken(username, password, port))
+                    .contentType("application/json")
+                    .body("{}")
+                    .when()
+                    .post("/api/v1/events")
+                    .then()
+                    .statusCode(422)
+                    .body("message", equalTo("Invalid request"));
+
+            Assertions.assertEquals(0, eventRepository.findAll().size());
+        }
+    }
+
+    @Test
+    public void UserWithoutWriteEventAuthority_CreatesNewEvent_ReturnsNotAuthorized() {
+        for (Role role : Util.getRoleWithoutAuthority(eventWriteAuth)) {
+            buildAndWriteUser(role);
+            var eventForm = buildEventForm();
+
+            RestAssured.given()
+                    .given()
+                    .header("Authorization", Util.getToken(username, password, port))
+                    .contentType("application/json")
+                    .body(Util.toBody(eventForm))
+                    .when()
+                    .post("/api/v1/events")
+                    .then()
+                    .statusCode(401);
+        }
+    }
+
+    private User buildAndWriteUser(Role role) {
+        return userRepository.save(User.builder()
+                .role(role)
+                .password(passwordEncoder.encode(password))
+                .username(username)
                 .build()
         );
+    }
 
-        var eventForm = NewEventForm.builder()
+    private NewEventForm buildEventForm() {
+        return NewEventForm.builder()
                 .title("title")
                 .shortDescription("short")
                 .fullDescription("full")
-                .applicationDeadline(new Date())
-                .startingDate(new Date())
+                .applicationDeadline(Util.getRandomFutureDate())
+                .startingDate(Util.getRandomFutureDate())
                 .build();
-
-        RestAssured.given()
-                .header("Authorization", Util.getToken("username", "password", port))
-                .contentType("application/json")
-                .body(toBody(eventForm))
-                .when()
-                .post("/api/v1/events")
-                .then()
-                .body("id", notNullValue())
-                .header("Location", contains("/api/v1/events/"))
-                .body("message", equalTo("Successfully created event"))
-                .statusCode(201);
-
-        var result = RestAssured.given()
-                .given()
-                .header("Authorization", Util.getToken("username", "password", port))
-                .contentType("application/json")
-                .body(toBody(eventForm))
-                .when()
-                .post("/api/v1/events")
-                .then();
-
-        result
-                .statusCode(201)
-                .body("message", equalTo("Successfully created event"));
-
-        Assertions.assertEquals(1, eventRepository.findAll().size());
-
-        UUID id = eventRepository.findAll().get(0).getId();
-
-        result.header("Location", contains("/api/v1/events/" + id));
-    }
-
-    private String toBody(NewEventForm newEvent) {
-        return "{" +
-                "\"title\": \"" + newEvent.getTitle() + "\", " +
-                "\"shortDescription\": \"" + newEvent.getShortDescription() + "\", " +
-                "\"fullDescription\": \"" + newEvent.getFullDescription() + "\", " +
-                "\"applicationDeadline\": \"" + newEvent.getApplicationDeadline() + "\", " +
-                "\"startingDate\": \"" + newEvent.getStartingDate() + "\"" +
-                "}";
     }
 
 }
