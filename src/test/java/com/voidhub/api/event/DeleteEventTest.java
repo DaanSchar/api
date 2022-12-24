@@ -45,6 +45,12 @@ public class DeleteEventTest {
         RestAssured.port = port;
     }
 
+    @AfterEach
+    public void afterEach() {
+        eventRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     public void eventWriteAuthorityExists() {
         Assertions.assertTrue(Util.getRolesWithAuthority(eventWriteAuthority).size() > 0);

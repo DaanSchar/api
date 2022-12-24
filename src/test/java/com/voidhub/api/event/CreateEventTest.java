@@ -51,6 +51,12 @@ public class CreateEventTest {
         userRepository.deleteAll();
     }
 
+    @AfterEach
+    public void afterEach() {
+        eventRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     public void roleWithWriteEventAuthorityExists() {
         Assertions.assertTrue(Util.getRolesWithAuthority(eventWriteAuth).size() > 0);

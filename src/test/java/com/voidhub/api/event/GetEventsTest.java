@@ -5,6 +5,7 @@ import com.voidhub.api.user.Role;
 import com.voidhub.api.user.User;
 import com.voidhub.api.user.UserRepository;
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,12 @@ public class GetEventsTest {
         userRepository.deleteAll();
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
+    }
+
+    @AfterEach
+    public void afterEach() {
+        eventRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
