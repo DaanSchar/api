@@ -1,5 +1,6 @@
 package com.voidhub.api.event;
 
+import com.voidhub.api.UserTestUtil;
 import com.voidhub.api.Util;
 import com.voidhub.api.user.Role;
 import com.voidhub.api.user.User;
@@ -35,6 +36,9 @@ public class UpdateEventTest {
     private final String eventWriteAuth = "event:write";
     private static String username;
     private static String password;
+
+    @Autowired
+    private UserTestUtil userTestUtil;
 
     @BeforeAll
     public static void beforeAll() {
@@ -75,16 +79,14 @@ public class UpdateEventTest {
             eventRepository.deleteAll();
             userRepository.deleteAll();
 
-            User user = userRepository.save(User.builder()
-                    .username(username)
-                    .password(passwordEncoder.encode(password))
-                    .role(role)
-                    .build());
+            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
+            User user = userAndToken.getFirst();
+            String token = userAndToken.getSecond();
 
             Event event = saveEvent(user);
 
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", token)
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -122,14 +124,10 @@ public class UpdateEventTest {
     @Test
     public void userWithEventWriteAuthority_UpdatesNonExistingEvent_ReturnsNotFound() {
         for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
-            userRepository.save(User.builder()
-                    .username(username)
-                    .password(passwordEncoder.encode(password))
-                    .role(role)
-                    .build());
+            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
 
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", userAndToken.getSecond())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -153,14 +151,10 @@ public class UpdateEventTest {
 
             Event event = saveEvent(publisher);
 
-            userRepository.save(User.builder()
-                    .username(username)
-                    .password(passwordEncoder.encode(password))
-                    .role(role)
-                    .build());
+            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
 
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", userAndToken.getSecond())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -177,16 +171,12 @@ public class UpdateEventTest {
             eventRepository.deleteAll();
             userRepository.deleteAll();
 
-            User user = userRepository.save(User.builder()
-                    .username(username)
-                    .password(passwordEncoder.encode(password))
-                    .role(role)
-                    .build());
+            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
 
-            Event event = saveEvent(user);
+            Event event = saveEvent(userAndToken.getFirst());
 
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", userAndToken.getSecond())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
