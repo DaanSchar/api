@@ -37,9 +37,13 @@ public class EventController {
     }
 
     @PutMapping("{eventId}")
-    //    @PreAuthorize(ADMIN)
-    public void updateExistingEvent(@RequestBody Event event, @PathVariable(name = "eventId") UUID eventId) {
-        eventService.updateExistingEvent(event, eventId);
+    @PreAuthorize("hasAuthority('event:write')")
+    public ResponseEntity<Message> updateExistingEvent(
+            @RequestBody @Valid UpdateEventForm form,
+            @PathVariable(name = "eventId") UUID eventId,
+            Principal principal
+    ) {
+        return eventService.updateExistingEvent(form, eventId, principal.getName());
     }
 
     @GetMapping("{eventId}")

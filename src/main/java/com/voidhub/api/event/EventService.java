@@ -49,46 +49,41 @@ public class EventService {
                 .body(new Message("Successfully created event"));
     }
 
-    //TODO: Horrible solution, fix it
-    // The issue is that the event object is not updated in the database
-    // if there is a value missing in th event input object.
-    public void updateExistingEvent(Event event, UUID eventId) {
-        event.setId(eventId);
-        eventRepository.findById(eventId).ifPresentOrElse(
-                e -> {
-                    if (event.getCreatedAt() == null) {
-                        event.setCreatedAt(e.getCreatedAt());
-                    }
-                    if (event.getApplicationDeadline() == null) {
-                        event.setApplicationDeadline(e.getApplicationDeadline());
-                    }
-                    if (event.getStartingDate() == null) {
-                        event.setStartingDate(e.getStartingDate());
-                    }
-                    if (event.getPublishedBy() == null) {
-                        event.setPublishedBy(e.getPublishedBy());
-                    }
-                    if (event.getFullDescription() == null) {
-                        event.setFullDescription(e.getFullDescription());
-                    }
-                    if (event.getShortDescription() == null) {
-                        event.setShortDescription(e.getShortDescription());
-                    }
-                },
-                () -> {}
-        );
-
-        eventRepository.save(event);
-    }
-
-    public ResponseEntity<Message> deleteEvent(UUID eventId, String username) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
-
+    public ResponseEntity<Message> updateExistingEvent(UpdateEventForm form, UUID eventId, String username) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event does not exist"));
 
-        if (!event.getPublishedBy().equals(user)) {
+        if (!userPublishedThisEvent(event, username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value())
+                    .body(new Message("You did not publish this event"));
+        }
+
+        if (form.getTitle() != null) {
+            event.setTitle(form.getTitle());
+        }
+        if (form.getShortDescription() != null) {
+            event.setShortDescription(form.getShortDescription());
+        }
+        if (form.getFullDescription() != null) {
+            event.setFullDescription(form.getFullDescription());
+        }
+        if (form.getStartingDate() != null) {
+            event.setStartingDate(form.getStartingDate());
+        }
+        if (form.getApplicationDeadline() != null) {
+            event.setApplicationDeadline(form.getApplicationDeadline());
+        }
+
+        eventRepository.save(event);
+
+        return ResponseEntity.ok(new Message("Successfully updated event"));
+    }
+
+    public ResponseEntity<Message> deleteEvent(UUID eventId, String username) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event does not exist"));
+
+        if (!userPublishedThisEvent(event, username)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN.value())
                     .body(new Message("You did not publish this event"));
         }
@@ -96,5 +91,12 @@ public class EventService {
         eventRepository.deleteById(eventId);
 
         return ResponseEntity.ok(new Message("Successfully deleted event"));
+    }
+
+    public boolean userPublishedThisEvent(Event event, String username) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+        return event.getPublishedBy().equals(user);
     }
 }
