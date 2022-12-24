@@ -2,9 +2,7 @@ package com.voidhub.api.event;
 
 import com.voidhub.api.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -43,7 +41,7 @@ public class Event {
 
     @Column(nullable = false)
     @UpdateTimestamp
-    private Date updateAt;
+    private Date updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User publishedBy;

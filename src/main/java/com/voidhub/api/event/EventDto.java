@@ -18,6 +18,7 @@ public class EventDto {
         this.applicationDeadline = event.getApplicationDeadline();
         this.startingDate = event.getStartingDate();
         this.publishedBy = new UserDto(event.getPublishedBy());
+        this.updatedAt = event.getUpdatedAt();
     }
 
     private String title;
@@ -28,5 +29,6 @@ public class EventDto {
     private Date applicationDeadline;
     private Date startingDate;
     private UserDto publishedBy;
+    private Date updatedAt;
 
 }
