@@ -27,18 +27,18 @@ public class CreateNewUserTest {
 
     @BeforeEach
     public void setUp() {
+        RestAssured.port = port;
+        RestAssured.baseURI = "http://localhost";
         userRepository.deleteAll();
     }
 
     @Test
     public void CreateNewUserReturnsOkAndSavesUser() {
-        String requestBody = "{\"username\": \"username\", \"password\": \"123validPassword!\"}";
-
         RestAssured.given()
                 .contentType("application/json")
-                .body(requestBody)
+                .body(toBody("username", "123validPassword!"))
                 .when()
-                .post("http://localhost:" + port + "/api/v1/users")
+                .post("api/v1/users")
                 .then()
                 .body("message", equalTo("Successfully created user"))
                 .statusCode(200);
@@ -52,26 +52,11 @@ public class CreateNewUserTest {
 
     @Test
     public void CreateNewUserUsingEmptyBodyReturnsBadRequest() {
-        String requestBody = "{\"username\": \"\", \"password\": \"\"}";
-
         RestAssured.given()
                 .contentType("application/json")
-                .body(requestBody)
+                .body("{}")
                 .when()
-                .post("http://localhost:" + port + "/api/v1/users")
-                .then()
-                .body("message", equalTo("Invalid request"))
-                .body("errors", hasKey("password"))
-                .body("errors", hasKey("username"))
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
-
-        requestBody = "{}";
-
-        RestAssured.given()
-                .contentType("application/json")
-                .body(requestBody)
-                .when()
-                .post("http://localhost:" + port + "/api/v1/users")
+                .post("api/v1/users")
                 .then()
                 .body("message", equalTo("Invalid request"))
                 .body("errors", hasKey("username"))
@@ -83,13 +68,11 @@ public class CreateNewUserTest {
 
     @Test
     public void createNewUserUsingEmptyUsernameReturnsBadRequest() {
-        String requestBody = "{\"username\": \"\", \"password\": \"password\"}";
-
         RestAssured.given()
                 .contentType("application/json")
-                .body(requestBody)
+                .body(toBody("", ""))
                 .when()
-                .post("http://localhost:" + port + "/api/v1/users")
+                .post("/api/v1/users")
                 .then()
                 .body("message", equalTo("Invalid request"))
                 .body("errors", hasKey("username"))
@@ -99,8 +82,16 @@ public class CreateNewUserTest {
     }
 
     @Test
-    public void createNewUserUsingEmptyPasswordReturnsBadRequest() {
-        String requestBody = "{\"username\": \"username\", \"password\": \"\"}";
+    public void createNewUserWithAlreadyExistingUsernameReturnsConflict() {
+        String requestBody = toBody("username", "valid4Passwords!");
+
+        RestAssured.given()
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/api/v1/users")
+                .then()
+                .statusCode(HttpStatus.OK.value());
 
         RestAssured.given()
                 .contentType("application/json")
@@ -108,11 +99,27 @@ public class CreateNewUserTest {
                 .when()
                 .post("http://localhost:" + port + "/api/v1/users")
                 .then()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .body("message", equalTo("Username already exists"));
+    }
+
+    @Test
+    public void createNewUserUsingEmptyPasswordReturnsBadRequest() {
+        RestAssured.given()
+                .contentType("application/json")
+                .body(toBody("username", ""))
+                .when()
+                .post("/api/v1/users")
+                .then()
                 .body("message", equalTo("Invalid request"))
                 .body("errors", hasKey("password"))
                 .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
 
         Assertions.assertTrue(userRepository.findAll().isEmpty());
+    }
+
+    private String toBody(String username, String password) {
+        return "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
     }
 
 }
