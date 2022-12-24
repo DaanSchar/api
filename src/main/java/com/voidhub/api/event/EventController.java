@@ -49,9 +49,9 @@ public class EventController {
     }
 
     @DeleteMapping("{eventId}")
-    //    @PreAuthorize(ADMIN)
-    public void deleteEvent(@PathVariable(name = "eventId") UUID eventId) {
-        eventService.deleteEvent(eventId);
+    @PreAuthorize("hasAuthority('event:write')")
+    public ResponseEntity<Message> deleteEvent(@PathVariable(name = "eventId") UUID eventId, Principal principal) {
+        return eventService.deleteEvent(eventId, principal.getName());
     }
 
 

@@ -1,19 +1,15 @@
 package com.voidhub.api.event;
 
-import com.voidhub.api.user.User;
-import com.voidhub.api.user.UserRepository;
+import com.voidhub.api.user.*;
 import com.voidhub.api.util.Message;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.net.*;
+import java.util.*;
 
 @Service
 public class EventService {
@@ -85,7 +81,20 @@ public class EventService {
         eventRepository.save(event);
     }
 
-    public void deleteEvent(UUID eventId) {
+    public ResponseEntity<Message> deleteEvent(UUID eventId, String username) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event does not exist"));
+
+        if (!event.getPublishedBy().equals(user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN.value())
+                    .body(new Message("You did not publish this event"));
+        }
+
         eventRepository.deleteById(eventId);
+
+        return ResponseEntity.ok(new Message("Successfully deleted event"));
     }
 }
