@@ -47,25 +47,18 @@ public class UserService {
     }
 
     public ResponseEntity<Message> deleteUser(String username) {
-        var existingUser = userRepository.findById(username);
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-        if (existingUser.isEmpty()) {
-            throw new EntityNotFoundException("User does not exist");
-        }
-
-        userRepository.delete(existingUser.get());
+        userRepository.delete(user);
 
         return ResponseEntity.status(HttpStatus.OK).body(new Message("Successfully deleted user"));
     }
 
     public ResponseEntity<Message> updateUserRole(String username, String roleName) {
-        var existingUser = userRepository.findById(username);
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
-        if (existingUser.isEmpty()) {
-            throw new EntityNotFoundException("User does not exist");
-        }
-
-        User user = existingUser.get();
         Role role;
 
         try {
@@ -88,13 +81,8 @@ public class UserService {
         String oldPassword = form.getOldPassword();
         String newPassword = form.getNewPassword();
 
-        var existingUser = userRepository.findById(username);
-
-        if (existingUser.isEmpty()) {
-            throw new EntityNotFoundException("User does not exist");
-        }
-
-        User user = existingUser.get();
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Message("Wrong password"));
