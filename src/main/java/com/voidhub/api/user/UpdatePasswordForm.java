@@ -4,7 +4,6 @@ import com.voidhub.api.validation.PasswordConstraint;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class UpdatePasswordForm {

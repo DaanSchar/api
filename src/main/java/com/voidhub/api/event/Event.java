@@ -57,15 +57,4 @@ public class Event {
         this.publishedBy = publishedBy;
     }
 
-    @Override
-    public String toString() {
-        return "Event{" +
-                "id=" + id +
-                ", shortDesc=" + shortDescription +
-                ", fullDesc=" + fullDescription +
-                ", creationDate=" + createdAt +
-                ", applicationDeadline=" + applicationDeadline +
-                ", startingDate=" + startingDate +
-                ", creator=" + publishedBy + "}";
-    }
 }

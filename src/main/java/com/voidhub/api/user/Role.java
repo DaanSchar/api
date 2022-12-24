@@ -35,9 +35,4 @@ public enum Role {
                 .toList();
     }
 
-    @Override
-    public String toString() {
-        return authorities.get(0).getAuthority();
-    }
-
 }
