@@ -53,17 +53,17 @@ public class CreateEventTest {
 
     @Test
     public void roleWithWriteEventAuthorityExists() {
-        Assertions.assertTrue(Util.getRoleWithAuthority(eventWriteAuth).size() > 0);
+        Assertions.assertTrue(Util.getRolesWithAuthority(eventWriteAuth).size() > 0);
     }
 
     @Test
     public void rolesWithoutWriteEventAuthorityExist() {
-        Assertions.assertTrue(Util.getRoleWithoutAuthority(eventWriteAuth).size() > 0);
+        Assertions.assertTrue(Util.getRolesWithoutAuthority(eventWriteAuth).size() > 0);
     }
 
     @Test
     public void userWithEventWriteAuthority_CreatesNewEvent_ReturnsOkWithId() {
-        for (Role role : Util.getRoleWithAuthority(eventWriteAuth)) {
+        for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
             eventRepository.deleteAll();
 
             buildAndWriteUser(role);
@@ -93,7 +93,7 @@ public class CreateEventTest {
     public void userWithEventWriteAuthority_CreatesNewEventWithInvalidDate_Returns422() {
         Assertions.assertTrue(Util.roleWithAuthorityExists(eventWriteAuth));
 
-        for (Role role : Util.getRoleWithAuthority(eventWriteAuth)) {
+        for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
             buildAndWriteUser(role);
             RestAssured.given()
                     .given()
@@ -112,7 +112,7 @@ public class CreateEventTest {
 
     @Test
     public void UserWithoutWriteEventAuthority_CreatesNewEvent_ReturnsNotAuthorized() {
-        for (Role role : Util.getRoleWithoutAuthority(eventWriteAuth)) {
+        for (Role role : Util.getRolesWithoutAuthority(eventWriteAuth)) {
             buildAndWriteUser(role);
             var eventForm = buildEventForm();
 

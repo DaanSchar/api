@@ -55,16 +55,16 @@ public class Util {
     }
 
     public static boolean roleWithAuthorityExists(String authority) {
-        return getRoleWithAuthority(authority).size() > 0;
+        return getRolesWithAuthority(authority).size() > 0;
     }
 
-    public static List<Role> getRoleWithAuthority(String authority) {
+    public static List<Role> getRolesWithAuthority(String authority) {
         return Arrays.stream(Role.values())
                 .filter(role -> role.getAuthorities().contains(new SimpleGrantedAuthority(authority)))
                 .toList();
     }
 
-    public static List<Role> getRoleWithoutAuthority(String authority) {
+    public static List<Role> getRolesWithoutAuthority(String authority) {
         return Arrays.stream(Role.values())
                 .filter(role -> !role.getAuthorities().contains(new SimpleGrantedAuthority(authority)))
                 .toList();
