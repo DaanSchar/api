@@ -2,7 +2,11 @@ package com.voidhub.api.event;
 
 
 import com.voidhub.api.*;
-import com.voidhub.api.user.*;
+import com.voidhub.api.entity.Role;
+import com.voidhub.api.entity.User;
+import com.voidhub.api.form.create.CreateEventForm;
+import com.voidhub.api.repository.EventRepository;
+import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;
@@ -143,8 +147,8 @@ public class CreateEventTest {
         );
     }
 
-    private NewEventForm buildEventForm() {
-        return NewEventForm.builder()
+    private CreateEventForm buildEventForm() {
+        return CreateEventForm.builder()
                 .title("title")
                 .shortDescription("short")
                 .fullDescription("full")

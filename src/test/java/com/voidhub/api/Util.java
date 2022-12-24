@@ -1,7 +1,7 @@
 package com.voidhub.api;
 
-import com.voidhub.api.event.NewEventForm;
-import com.voidhub.api.user.Role;
+import com.voidhub.api.form.create.CreateEventForm;
+import com.voidhub.api.entity.Role;
 import io.restassured.RestAssured;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -44,7 +44,7 @@ public class Util {
         return cal.getTime();
     }
 
-    public static String toBody(NewEventForm newEvent) {
+    public static String toBody(CreateEventForm newEvent) {
         return "{" +
                 "\"title\": \"" + newEvent.getTitle() + "\", " +
                 "\"shortDescription\": \"" + newEvent.getShortDescription() + "\", " +

@@ -2,9 +2,11 @@ package com.voidhub.api.event;
 
 import com.voidhub.api.UserTestUtil;
 import com.voidhub.api.Util;
-import com.voidhub.api.user.Role;
-import com.voidhub.api.user.User;
-import com.voidhub.api.user.UserRepository;
+import com.voidhub.api.entity.Event;
+import com.voidhub.api.repository.EventRepository;
+import com.voidhub.api.entity.Role;
+import com.voidhub.api.entity.User;
+import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

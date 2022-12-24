@@ -1,6 +1,9 @@
 package com.voidhub.api.user;
 
 
+import com.voidhub.api.entity.Role;
+import com.voidhub.api.entity.User;
+import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;

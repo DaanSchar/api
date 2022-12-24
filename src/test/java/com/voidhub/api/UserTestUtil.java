@@ -1,6 +1,8 @@
 package com.voidhub.api;
 
-import com.voidhub.api.user.*;
+import com.voidhub.api.entity.Role;
+import com.voidhub.api.entity.User;
+import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
