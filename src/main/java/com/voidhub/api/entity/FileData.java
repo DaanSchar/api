@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class File {
+public class FileData {
 
     @Id
     @GeneratedValue(generator = "uuid")
