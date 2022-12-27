@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+application:
+  filesystem:
+    path: C:\Users\Daan\WebstormProjects\void-hub\api\src\test\resources\file-upload\test-file-system
