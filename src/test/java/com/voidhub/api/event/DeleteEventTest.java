@@ -1,6 +1,6 @@
 package com.voidhub.api.event;
 
-import com.voidhub.api.Util;
+import com.voidhub.api.util.Util;
 import com.voidhub.api.entity.Event;
 import com.voidhub.api.entity.Role;
 import com.voidhub.api.entity.User;

@@ -1,6 +1,6 @@
 package com.voidhub.api.user;
 
-import com.voidhub.api.Util;
+import com.voidhub.api.util.Util;
 import com.voidhub.api.entity.Role;
 import com.voidhub.api.entity.User;
 import com.voidhub.api.repository.UserRepository;

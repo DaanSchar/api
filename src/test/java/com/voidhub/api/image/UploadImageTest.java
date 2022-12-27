@@ -1,18 +1,15 @@
 package com.voidhub.api.image;
 
-import com.voidhub.api.*;
-import com.voidhub.api.configuration.file.FileSystemConfig;
 import com.voidhub.api.entity.*;
 import com.voidhub.api.repository.*;
+import com.voidhub.api.util.*;
 import io.restassured.RestAssured;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.*;
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.equalTo;
 
@@ -20,38 +17,42 @@ import static org.hamcrest.Matchers.equalTo;
 @ActiveProfiles("test")
 public class UploadImageTest {
 
-    private @Autowired UserRepository userRepository;
+//    private @Autowired UserRepository userRepository;
     private @Autowired FileRepository fileRepository;
-    private @Autowired UserTestUtil userTestUtil;
-    private @Autowired FileSystemConfig fileSystemConfig;
+    private @Autowired UserUtil userUtil;
+    private @Autowired FileSystemUtil fileSystemUtil;
 
     @Value("${local.server.port}")
     private int port;
 
     private final String fileWriteAuth = "file:write";
-    private static File testFile;
-    private static String username;
-    private static String password;
+    private final String url = "/api/v1/images";
+    private static File testImg;
+    private static File testTxt;
 
     @BeforeAll
     public static void beforeAll() {
-        username = UUID.randomUUID().toString();
-        password = UUID.randomUUID().toString();
         RestAssured.baseURI = "http://localhost";
 
-        testFile = new File("src/test/resources/file-upload/test-files/test-img.jpg");
+        testImg = new File("src/test/resources/file-upload/test-files/test-img.jpg");
+        testTxt = new File("src/test/resources/file-upload/test-files/test-txt.txt");
     }
 
     @BeforeEach
     public void beforeEach() {
         RestAssured.port = port;
         fileRepository.deleteAll();
-        userRepository.deleteAll();
+        userUtil.clearUsers();
+    }
+
+    @AfterEach
+    public void afterEach() throws IOException {
+        fileSystemUtil.clear();
     }
 
     @Test
     public void testFileExists() {
-        Assertions.assertTrue(testFile.exists());
+        Assertions.assertTrue(testImg.exists());
     }
 
     @Test
@@ -65,66 +66,66 @@ public class UploadImageTest {
     }
 
     @Test
-    public void userWithFileWriteAuthority_UploadImage_ReturnsCreated() throws IOException {
-        for (Role role : Util.getRolesWithAuthority(fileWriteAuth)) {
+    public void userWithFileWriteAuthority_UploadImage_ReturnsCreated() {
+        for (TestUser testUser : userUtil.getUsersWithAuthority(fileWriteAuth, port)) {
             fileRepository.deleteAll();
-            userRepository.deleteAll();
-
-            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
-            int totalFilesInFileSystemBeforeUpload = getFileSystemDirectory().list().length;
+            int totalFilesInFileSystemBeforeUpload = fileSystemUtil.getDirectory().list().length;
 
             var result = RestAssured.given()
-                    .header("Authorization", userAndToken.getSecond())
-                    .multiPart("image", testFile, "image/jpeg")
-                    .post("api/v1/files")
+                    .header("Authorization", testUser.getToken())
+                    .multiPart("image", testImg, "image/jpeg")
+                    .post(url)
                     .then()
-                    .body("message", equalTo("File uploaded successfully"))
-                    .statusCode(201);
+                    .statusCode(201)
+                    .body("message", equalTo("File uploaded successfully"));
+
 
             Assertions.assertEquals(1, fileRepository.findAll().size());
             FileData fileData = fileRepository.findAll().get(0);
+
             result.header("Location", equalTo("/api/v1/files/" + fileData.getId()));
 
             Assertions.assertEquals(
                     totalFilesInFileSystemBeforeUpload + 1,
-                    getFileSystemDirectory().list().length
+                    fileSystemUtil.getDirectory().list().length
             );
         }
-
-        clearFileSystem();
     }
 
     @Test
     public void userWithoutWriteFileAuthority_UploadsFile_Returns401() throws IOException {
-        for (Role role : Util.getRolesWithoutAuthority(fileWriteAuth)) {
+        for (TestUser user : userUtil.getUsersWithoutAuthority(fileWriteAuth, port)) {
             fileRepository.deleteAll();
-            userRepository.deleteAll();
-
-            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
-            int totalFilesInFileSystemBeforeUpload = getFileSystemDirectory().list().length;
+            int totalFilesInFileSystemBeforeUpload = fileSystemUtil.getDirectory().list().length;
 
             RestAssured.given()
-                    .header("Authorization", userAndToken.getSecond())
-                    .multiPart("image", testFile, "image/jpeg")
-                    .post("api/v1/files")
+                    .header("Authorization", user.getToken())
+                    .multiPart("image", testImg, "image/jpeg")
+                    .post(url)
                     .then()
                     .statusCode(401);
 
             Assertions.assertEquals(0, fileRepository.findAll().size());
             Assertions.assertEquals(
                     totalFilesInFileSystemBeforeUpload,
-                    getFileSystemDirectory().list().length
+                    fileSystemUtil.getDirectory().list().length
             );
         }
-
-        clearFileSystem();
     }
 
-    private void clearFileSystem() throws IOException {
-        FileUtils.cleanDirectory(new File(fileSystemConfig.getPath()));
+    @Test
+    public void fileIsNotAnImage() {
+        TestUser user = userUtil.getUserWithAuthority(fileWriteAuth, port);
+
+        RestAssured.given()
+                .header("Authorization", user.getToken())
+                .multiPart("image", testTxt, "application/text")
+                .post(url)
+                .then()
+                .statusCode(400)
+                .body("message", equalTo("File is not an image"));
+
+        Assertions.assertEquals(0, fileRepository.findAll().size());
     }
 
-    private File getFileSystemDirectory() {
-        return new File(fileSystemConfig.getPath());
-    }
 }

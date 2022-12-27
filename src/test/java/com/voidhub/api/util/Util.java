@@ -1,4 +1,4 @@
-package com.voidhub.api;
+package com.voidhub.api.util;
 
 import com.voidhub.api.form.create.CreateEventForm;
 import com.voidhub.api.entity.Role;

@@ -1,7 +1,7 @@
 package com.voidhub.api.event;
 
-import com.voidhub.api.UserTestUtil;
-import com.voidhub.api.Util;
+import com.voidhub.api.util.UserUtil;
+import com.voidhub.api.util.Util;
 import com.voidhub.api.entity.Event;
 import com.voidhub.api.repository.EventRepository;
 import com.voidhub.api.entity.Role;
@@ -40,7 +40,7 @@ public class UpdateEventTest {
     private static String password;
 
     @Autowired
-    private UserTestUtil userTestUtil;
+    private UserUtil userUtil;
 
     @BeforeAll
     public static void beforeAll() {
@@ -81,7 +81,7 @@ public class UpdateEventTest {
             eventRepository.deleteAll();
             userRepository.deleteAll();
 
-            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
+            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
             User user = userAndToken.getFirst();
             String token = userAndToken.getSecond();
 
@@ -126,7 +126,7 @@ public class UpdateEventTest {
     @Test
     public void userWithEventWriteAuthority_UpdatesNonExistingEvent_ReturnsNotFound() {
         for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
-            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
+            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
 
             RestAssured.given()
                     .header("Authorization", userAndToken.getSecond())
@@ -153,7 +153,7 @@ public class UpdateEventTest {
 
             Event event = saveEvent(publisher);
 
-            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
+            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
 
             RestAssured.given()
                     .header("Authorization", userAndToken.getSecond())
@@ -173,7 +173,7 @@ public class UpdateEventTest {
             eventRepository.deleteAll();
             userRepository.deleteAll();
 
-            var userAndToken = userTestUtil.createUserAndLogin(username, password, role, port);
+            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
 
             Event event = saveEvent(userAndToken.getFirst());
 
