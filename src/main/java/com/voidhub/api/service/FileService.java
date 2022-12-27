@@ -22,7 +22,7 @@ public class FileService {
     private @Autowired FileRepository fileRepository;
     private @Autowired FileSystemConfig fileSystemConfig;
 
-    public ResponseEntity<Message> uploadFile(MultipartFile file) {
+    public ResponseEntity<Message> uploadFile(MultipartFile file) throws IOException {
         String filePath = fileSystemConfig.getPath() + "/" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
         FileData fileData = fileRepository.save(FileData.builder()
@@ -31,11 +31,7 @@ public class FileService {
                 .filePath(filePath)
                 .build());
 
-        try {
-            file.transferTo(new java.io.File(filePath));
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(new Message("Error while uploading file"));
-        }
+        file.transferTo(new java.io.File(filePath));
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -43,18 +39,12 @@ public class FileService {
                 .body(new Message("File uploaded successfully"));
     }
 
-    public ResponseEntity<?> getFile(UUID id) {
+    public ResponseEntity<?> getFile(UUID id) throws IOException {
         FileData fileData = fileRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("File does not exist"));
 
         String filePath = fileData.getFilePath();
-        byte[] file;
-
-        try {
-            file = Files.readAllBytes(new java.io.File(filePath).toPath());
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().body(new Message("Error while reading file"));
-        }
+        byte[] file = Files.readAllBytes(new java.io.File(filePath).toPath());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.valueOf(fileData.getType()))
