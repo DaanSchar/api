@@ -31,4 +31,10 @@ public class FileData {
     @Column(nullable = false)
     private String filePath;
 
+    public FileData(String name, String type, String filePath) {
+        this.name = name;
+        this.type = type;
+        this.filePath = filePath;
+    }
+
 }

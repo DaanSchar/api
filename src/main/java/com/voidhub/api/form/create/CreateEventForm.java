@@ -1,11 +1,10 @@
 package com.voidhub.api.form.create;
 
 import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -31,5 +30,9 @@ public class CreateEventForm {
     @FutureOrPresent(message = "Starting date must be in the future")
     @NotNull(message = "Starting date is mandatory")
     private Date startingDate;
+
+    @NotNull(message = "Image ID is mandatory")
+    private UUID imageId;
+
 
 }

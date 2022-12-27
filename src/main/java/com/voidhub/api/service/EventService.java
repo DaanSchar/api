@@ -2,6 +2,7 @@ package com.voidhub.api.service;
 
 import com.voidhub.api.dto.EventDto;
 import com.voidhub.api.entity.Event;
+import com.voidhub.api.entity.FileData;
 import com.voidhub.api.entity.User;
 import com.voidhub.api.form.create.CreateEventForm;
 import com.voidhub.api.form.update.UpdateEventForm;
@@ -19,15 +20,9 @@ import java.util.*;
 @Service
 public class EventService {
 
-    private final EventRepository eventRepository;
-
-    private final UserRepository userRepository;
-
-    @Autowired
-    public EventService(EventRepository eventRepository, UserRepository userRepository) {
-        this.eventRepository = eventRepository;
-        this.userRepository = userRepository;
-    }
+    private @Autowired EventRepository eventRepository;
+    private @Autowired FileRepository fileRepository;
+    private @Autowired UserRepository userRepository;
 
     public List<EventDto> getEvents() {
         return eventRepository.findAll(Sort.by("startingDate"))
@@ -44,10 +39,10 @@ public class EventService {
         User user = userRepository.findById(username)
                 .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
+        FileData image = fileRepository.findById(form.getImageId())
+                .orElseThrow(() -> new EntityNotFoundException("Image does not exist"));
 
-        Event newEvent = eventRepository.save(
-                new Event(form, user)
-        );
+        Event newEvent = eventRepository.save(new Event(form, user, image));
 
         return ResponseEntity
                 .created(new URI("/api/v1/events/" + newEvent.getId()))

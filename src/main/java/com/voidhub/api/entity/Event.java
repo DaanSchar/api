@@ -46,15 +46,19 @@ public class Event {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User publishedBy;
 
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    private FileData image;
+
     public Event() {}
 
-    public Event(CreateEventForm form, User publishedBy) {
+    public Event(CreateEventForm form, User publishedBy, FileData image) {
         this.title = form.getTitle();
         this.shortDescription = form.getShortDescription();
         this.fullDescription = form.getFullDescription();
         this.applicationDeadline = form.getApplicationDeadline();
         this.startingDate = form.getStartingDate();
         this.publishedBy = publishedBy;
+        this.image = image;
     }
 
 }

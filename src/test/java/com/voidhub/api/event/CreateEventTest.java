@@ -91,4 +91,23 @@ public class CreateEventTest extends BaseTest {
         }
     }
 
+    @Test
+    public void userWithWriteEventAuthority_CreatesNewEventWithMissingImage_ReturnsNotFound() {
+        for (TestUser user : userUtil.getUsersWithAuthority(eventWriteAuth, port)) {
+            var form = eventUtil.getRandomValidEventForm();
+            form.setImageId(UUID.randomUUID());
+
+            RestAssured.given()
+                    .given()
+                    .header("Authorization", user.token())
+                    .contentType("application/json")
+                    .body(Util.toBody(form))
+                    .when()
+                    .post("/api/v1/events")
+                    .then()
+                    .statusCode(404)
+                    .body("message", equalTo("Image does not exist"));
+        }
+    }
+
 }

@@ -51,7 +51,7 @@ public class UserService {
                 username,
                 passwordEncoder.encode(password),
                 Role.MEMBER,
-                new UserInfo(form.getEmail(), form.getDiscordName(), form.getDiscordName())
+                new UserInfo(form.getEmail(), form.getDiscordName(), form.getMinecraftName())
         );
         userRepository.save(user);
 

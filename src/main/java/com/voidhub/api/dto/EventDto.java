@@ -19,6 +19,7 @@ public class EventDto {
         this.startingDate = event.getStartingDate();
         this.publishedBy = new UserDto(event.getPublishedBy());
         this.updatedAt = event.getUpdatedAt();
+        this.imageLocation = event.getImage().getFilePath();
     }
 
     private String title;
@@ -30,5 +31,6 @@ public class EventDto {
     private Date startingDate;
     private UserDto publishedBy;
     private Date updatedAt;
+    private String imageLocation;
 
 }

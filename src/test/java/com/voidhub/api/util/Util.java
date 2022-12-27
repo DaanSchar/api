@@ -2,7 +2,6 @@ package com.voidhub.api.util;
 
 import com.voidhub.api.form.create.CreateEventForm;
 import com.voidhub.api.entity.Role;
-import io.restassured.RestAssured;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.text.DateFormat;
@@ -10,17 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Util {
-
-    public static String getToken(String username, String password, int port) {
-        String body = "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
-
-        return RestAssured
-                .given()
-                .contentType("application/json")
-                .body(body)
-                .post("http://localhost:" + port + "/login")
-                .getHeader("Authorization");
-    }
 
     public static String formatDate(Date date) {
         TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -50,12 +38,9 @@ public class Util {
                 "\"shortDescription\": \"" + newEvent.getShortDescription() + "\", " +
                 "\"fullDescription\": \"" + newEvent.getFullDescription() + "\", " +
                 "\"applicationDeadline\": \"" + Util.formatDate(newEvent.getApplicationDeadline()) + "\", " +
-                "\"startingDate\": \"" + Util.formatDate(newEvent.getStartingDate()) + "\"" +
+                "\"startingDate\": \"" + Util.formatDate(newEvent.getStartingDate()) + "\", " +
+                "\"imageId\": \"" + newEvent.getImageId() + "\"" +
                 "}";
-    }
-
-    public static boolean roleWithAuthorityExists(String authority) {
-        return getRolesWithAuthority(authority).size() > 0;
     }
 
     public static List<Role> getRolesWithAuthority(String authority) {
