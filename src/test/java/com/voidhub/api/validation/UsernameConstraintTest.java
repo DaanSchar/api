@@ -1,6 +1,6 @@
 package com.voidhub.api.validation;
 
-import com.voidhub.api.util.validation.UsernameConstraint;
+import com.voidhub.api.util.validation.constraint.UsernameConstraint;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Assertions;
