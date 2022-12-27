@@ -18,3 +18,5 @@ application:
     secretKey: securesecuresecuresecuresecuresecuresecuresecuresecsecuresecuresecuresecuresecuresecuresecuresecuresecure
     tokenPrefix: "Bearer "
     tokenExpirationAfterDays: 14
+  filesystem:
+    path: C:\Users\Daan\WebstormProjects\void-hub\api\files
