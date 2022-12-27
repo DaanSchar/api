@@ -1,5 +1,6 @@
-package com.voidhub.api.util.validation;
+package com.voidhub.api.util.validation.constraint;
 
+import com.voidhub.api.util.validation.validator.UsernameValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
