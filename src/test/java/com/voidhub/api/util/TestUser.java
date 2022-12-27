@@ -1,7 +1,6 @@
 package com.voidhub.api.util;
 
 import com.voidhub.api.entity.User;
-import lombok.Getter;
 
 public class TestUser {
 
