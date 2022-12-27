@@ -12,18 +12,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.UUID;
+import java.io.IOException;
 
 @Controller
-@RequestMapping("/api/v1/files")
+@RequestMapping("/api/v1/images")
 public class ImageController {
 
-    @Autowired
-    private FileService fileService;
+    private @Autowired FileService fileService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('file:write')")
-    public ResponseEntity<Message> uploadImage(@RequestParam("image") MultipartFile image) {
+    public ResponseEntity<Message> uploadImage(@RequestParam("image") MultipartFile image) throws IOException {
         if (!isImage(image)) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -33,19 +32,9 @@ public class ImageController {
         return fileService.uploadFile(image);
     }
 
-    @GetMapping("/{file_id}")
-    public ResponseEntity<?> getImage(@PathVariable(name = "file_id") UUID id) {
-        return fileService.getFile(id);
-    }
-
     private boolean isImage(@NonNull MultipartFile file) {
         String type = file.getContentType();
-
-        if (type == null) {
-            return false;
-        }
-
-        return type.equals(MediaType.IMAGE_JPEG_VALUE) || type.equals(MediaType.IMAGE_PNG_VALUE);
+        return type == null || type.equals(MediaType.IMAGE_JPEG_VALUE) || type.equals(MediaType.IMAGE_PNG_VALUE);
     }
 
 }
