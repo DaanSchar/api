@@ -25,4 +25,13 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private Role role = Role.MEMBER;
 
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    private UserInfo userInfo;
+
+    public User(String username, String password, Role role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
 }

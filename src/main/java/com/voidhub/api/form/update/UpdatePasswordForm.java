@@ -1,6 +1,6 @@
 package com.voidhub.api.form.update;
 
-import com.voidhub.api.util.validation.PasswordConstraint;
+import com.voidhub.api.util.validation.constraint.PasswordConstraint;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
