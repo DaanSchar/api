@@ -12,3 +12,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         forma_sql: true
+
+application:
+  jwt:
+    secretKey: securesecuresecuresecuresecuresecuresecuresecuresecsecuresecuresecuresecuresecuresecuresecuresecuresecure
+    tokenPrefix: "Bearer "
+    tokenExpirationAfterDays: 14
+  filesystem:
+    path: C:\Users\Daan\WebstormProjects\void-hub\api\files
