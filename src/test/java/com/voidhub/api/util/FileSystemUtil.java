@@ -22,4 +22,12 @@ public class FileSystemUtil {
         return new File(fileSystemConfig.getPath());
     }
 
+    public File getTestImg() {
+        return new File("src/test/resources/file-upload/test-files/test-img.jpg");
+    }
+
+    public File getTestTxt() {
+        return new File("src/test/resources/file-upload/test-files/test-txt.txt");
+    }
+
 }

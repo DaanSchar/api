@@ -1,68 +1,28 @@
 package com.voidhub.api.event;
 
-import com.voidhub.api.util.UserUtil;
-import com.voidhub.api.util.Util;
+import com.voidhub.api.BaseTest;
+import com.voidhub.api.util.*;
 import com.voidhub.api.entity.Event;
 import com.voidhub.api.repository.EventRepository;
-import com.voidhub.api.entity.Role;
-import com.voidhub.api.entity.User;
-import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.equalTo;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-public class UpdateEventTest {
+public class UpdateEventTest extends BaseTest {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EventRepository eventRepository;
-
-    @Value("${local.server.port}")
-    private int port;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private @Autowired EventRepository eventRepository;
+    private @Autowired EventUtil eventUtil;
+    private @Autowired UserUtil userUtil;
 
     private final String eventWriteAuth = "event:write";
-    private static String username;
-    private static String password;
-
-    @Autowired
-    private UserUtil userUtil;
-
-    @BeforeAll
-    public static void beforeAll() {
-        username = UUID.randomUUID().toString();
-        password = UUID.randomUUID().toString();
-        RestAssured.baseURI = "http://localhost";
-    }
-
-    @BeforeEach
-    public void beforeEach() {
-        RestAssured.port = port;
-
-        // order matters here. cannot delete users if events still exist,
-        // as there is a foreign key constraint
-        eventRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @AfterEach
     public void afterEach() {
-        eventRepository.deleteAll();
-        userRepository.deleteAll();
+        eventUtil.clearEvents();
     }
 
     @Test
@@ -77,18 +37,11 @@ public class UpdateEventTest {
 
     @Test
     public void userWithEventWriteAuthority_UpdatesEventTitle_ReturnsOk() {
-        for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
-            eventRepository.deleteAll();
-            userRepository.deleteAll();
-
-            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
-            User user = userAndToken.getFirst();
-            String token = userAndToken.getSecond();
-
-            Event event = saveEvent(user);
+        for (TestUser user : userUtil.getUsersWithAuthority(eventWriteAuth, port)) {
+            Event event = eventUtil.createAndSaveEvent(user.user());
 
             RestAssured.given()
-                    .header("Authorization", token)
+                    .header("Authorization", user.token())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -102,7 +55,7 @@ public class UpdateEventTest {
             Assertions.assertEquals(event.getShortDescription(), updatedEvent.getShortDescription());
 
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", user.token())
                     .contentType("application/json")
                     .body("{\"title\": \"new new title\", \"shortDescription\": \"new short description\"}")
                     .when()
@@ -120,16 +73,16 @@ public class UpdateEventTest {
             Assertions.assertEquals(event.getPublishedBy().getUsername(), updatedEvent.getPublishedBy().getUsername());
             Assertions.assertEquals(event.getCreatedAt(), updatedEvent.getCreatedAt());
             Assertions.assertNotEquals(event.getUpdatedAt(), updatedEvent.getUpdatedAt());
+
+            eventUtil.clearEvents();
         }
     }
 
     @Test
     public void userWithEventWriteAuthority_UpdatesNonExistingEvent_ReturnsNotFound() {
-        for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
-            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
-
+        for (TestUser user : userUtil.getUsersWithAuthority(eventWriteAuth, port)) {
             RestAssured.given()
-                    .header("Authorization", userAndToken.getSecond())
+                    .header("Authorization", user.token())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -141,22 +94,12 @@ public class UpdateEventTest {
 
     @Test
     public void userWithEventWriteAuthority_UpdatesOthersEvent_ReturnsForbidden() {
-        for (Role role : Util.getRolesWithAuthority(eventWriteAuth)) {
-            eventRepository.deleteAll();
-            userRepository.deleteAll();
-
-            User publisher = userRepository.save(User.builder()
-                    .username("username")
-                    .password(passwordEncoder.encode("password"))
-                    .role(Role.ADMIN)
-                    .build());
-
-            Event event = saveEvent(publisher);
-
-            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
+        for (TestUser user : userUtil.getUsersWithAuthority(eventWriteAuth, port)) {
+            TestUser publisher = userUtil.getUserWithAuthority(eventWriteAuth, port);
+            Event event = eventUtil.createAndSaveEvent(publisher.user());
 
             RestAssured.given()
-                    .header("Authorization", userAndToken.getSecond())
+                    .header("Authorization", user.token())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -164,21 +107,18 @@ public class UpdateEventTest {
                     .then()
                     .statusCode(403)
                     .body("message", equalTo("You did not publish this event"));
+
+            eventUtil.clearEvents();
         }
     }
 
     @Test
     public void userWithoutWriteEventAuthority_UpdatesEventTitle_ReturnsUnauthorized() {
-        for (Role role : Util.getRolesWithoutAuthority(eventWriteAuth)) {
-            eventRepository.deleteAll();
-            userRepository.deleteAll();
-
-            var userAndToken = userUtil.createUserAndLogin(username, password, role, port);
-
-            Event event = saveEvent(userAndToken.getFirst());
+        for (TestUser user : userUtil.getUsersWithoutAuthority(eventWriteAuth, port)) {
+            Event event = eventUtil.createAndSaveEvent(user.user());
 
             RestAssured.given()
-                    .header("Authorization", userAndToken.getSecond())
+                    .header("Authorization", user.token())
                     .contentType("application/json")
                     .body("{\"title\": \"new title\"}")
                     .when()
@@ -187,18 +127,14 @@ public class UpdateEventTest {
                     .statusCode(401);
 
             Assertions.assertEquals("title", eventRepository.findById(event.getId()).get().getTitle());
+            eventUtil.clearEvents();
         }
     }
 
     @Test
     public void unauthorizedUser_UpdatesEventTitle_ReturnsUnauthorized() {
-        User user = userRepository.save(User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .role(Role.MEMBER)
-                .build());
-
-        Event event = saveEvent(user);
+        TestUser user = userUtil.getUserWithoutAuthority(eventWriteAuth, port);
+        Event event = eventUtil.createAndSaveEvent(user.user());
 
         RestAssured.given()
                 .contentType("application/json")
@@ -209,20 +145,6 @@ public class UpdateEventTest {
                 .statusCode(401);
 
         Assertions.assertEquals("title", eventRepository.findById(event.getId()).get().getTitle());
-    }
-
-    private Event saveEvent(User user) {
-        return eventRepository.save(new Event(
-                UUID.randomUUID(),
-                "title",
-                "shortDescription",
-                "fullDescription",
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                user
-        ));
     }
 
 }

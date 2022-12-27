@@ -1,28 +1,15 @@
 package com.voidhub.api.util;
 
 import com.voidhub.api.entity.User;
+import io.restassured.http.Header;
 
-public class TestUser {
+public record TestUser(User user, String unEncodedPassword, String token) {
 
-    private User user;
-    private String unEncodedPassword;
-    private String token;
-
-    public TestUser(User user, String unEncodedPassword, String token) {
-        this.user = user;
-        this.unEncodedPassword = unEncodedPassword;
-        this.token = token;
+    public String getUsername() {
+        return user.getUsername();
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public String getUnEncodedPassword() {
-        return unEncodedPassword;
+    public Header getAuthHeader() {
+        return new Header("Authorization", token);
     }
 }

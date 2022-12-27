@@ -1,37 +1,28 @@
 package com.voidhub.api.user;
 
 
-import com.voidhub.api.entity.Role;
-import com.voidhub.api.entity.User;
+import com.voidhub.api.BaseTest;
+import com.voidhub.api.entity.*;
 import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-public class CreateNewUserTest {
+public class CreateNewUserTest extends BaseTest {
 
     @Autowired
     private UserRepository userRepository;
 
-    @Value("${local.server.port}")
-    private int port;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
     @BeforeEach
-    public void setUp() {
-        RestAssured.port = port;
-        RestAssured.baseURI = "http://localhost";
+    public void beforeEach() {
+        super.beforeEach();
         userRepository.deleteAll();
     }
 
@@ -122,7 +113,13 @@ public class CreateNewUserTest {
     }
 
     private String toBody(String username, String password) {
-        return "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
+        return "{" +
+                "\"username\": \"" + username + "\"," +
+                " \"password\": \"" + password + "\"," +
+                "\"discordName\": \"John#1111\"," +
+                "\"email\": \"john.man@gmail.com\"," +
+                "\"minecraftName\": \"I_Always_Pvp\"" +
+                "}";
     }
 
 }

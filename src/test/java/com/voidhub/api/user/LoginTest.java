@@ -1,45 +1,25 @@
 package com.voidhub.api.user;
 
+import com.voidhub.api.BaseTest;
 import com.voidhub.api.entity.Role;
-import com.voidhub.api.entity.User;
-import com.voidhub.api.repository.UserRepository;
+import com.voidhub.api.util.*;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-public class LoginTest {
+public class LoginTest extends BaseTest {
 
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Value("${local.server.port}")
-    private int port;
+    private @Autowired UserUtil userUtil;
 
     @Test
     public void successfulLogin() {
-        userRepository.save(User.builder()
-                .role(Role.MEMBER)
-                .password(passwordEncoder.encode("password"))
-                .username("username")
-                .build()
-        );
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
                 .contentType("application/json")
-                .body("{\"username\": \"username\", \"password\": \"password\"}")
+                .body("{\"username\": \"" + member.getUsername() + "\", \"password\": \"" + member.unEncodedPassword() + "\"}")
                 .when()
                 .post("/login")
                 .then()
@@ -50,16 +30,11 @@ public class LoginTest {
 
     @Test
     public void unsuccessfulLoginUsingWrongPassword() {
-        userRepository.save(User.builder()
-                .role(Role.MEMBER)
-                .password(passwordEncoder.encode("password"))
-                .username("username")
-                .build()
-        );
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
                 .contentType("application/json")
-                .body("{\"username\": \"username\", \"password\": \"wrongpassword\"}")
+                .body("{\"username\": \"" + member.getUsername() + "\", \"password\": \"wrongpassword\"}")
                 .when()
                 .post("/login")
                 .then()
@@ -68,16 +43,11 @@ public class LoginTest {
 
     @Test
     public void unsuccessfulLoginUsingWrongUsername() {
-        userRepository.save(User.builder()
-                .role(Role.MEMBER)
-                .password(passwordEncoder.encode("password"))
-                .username("username")
-                .build()
-        );
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
                 .contentType("application/json")
-                .body("{\"username\": \"usernameee\", \"password\": \"password\"}")
+                .body("{\"username\": \"usernameee\", \"password\": \"" + member.unEncodedPassword() + "\"}")
                 .when()
                 .post("/login")
                 .then()
@@ -86,12 +56,7 @@ public class LoginTest {
 
     @Test
     public void unsuccessfulLoginUsingWrongUsernameAndPassword() {
-        userRepository.save(User.builder()
-                .role(Role.MEMBER)
-                .password(passwordEncoder.encode("password"))
-                .username("username")
-                .build()
-        );
+        userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
                 .contentType("application/json")
@@ -104,12 +69,7 @@ public class LoginTest {
 
     @Test
     public void unsuccessfulLoginUsingEmptyUsernameAndPassword() {
-        userRepository.save(User.builder()
-                .role(Role.MEMBER)
-                .password(passwordEncoder.encode("password"))
-                .username("username")
-                .build()
-        );
+        userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
                 .contentType("application/json")
@@ -129,13 +89,6 @@ public class LoginTest {
                 .post("/login")
                 .then()
                 .statusCode(401);
-    }
-
-    @BeforeEach
-    public void setUp() {
-        RestAssured.port = port;
-        RestAssured.baseURI = "http://localhost";
-        userRepository.deleteAll();
     }
 
 }

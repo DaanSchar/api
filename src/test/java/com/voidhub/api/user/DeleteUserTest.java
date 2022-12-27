@@ -1,61 +1,43 @@
 package com.voidhub.api.user;
 
-import com.voidhub.api.util.Util;
-import com.voidhub.api.entity.Role;
-import com.voidhub.api.entity.User;
+import com.voidhub.api.BaseTest;
+import com.voidhub.api.util.TestUser;
+import com.voidhub.api.util.UserUtil;
+import com.voidhub.api.entity.*;
 import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.hamcrest.Matchers.equalTo;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-public class DeleteUserTest {
+public class DeleteUserTest extends BaseTest {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Value("${local.server.port}")
-    private int port;
-
-    @BeforeEach
-    public void setUp() {
-        userRepository.deleteAll();
-    }
+    private @Autowired UserRepository userRepository;
+    private @Autowired UserUtil userUtil;
 
     @Test
     public void adminDeletesUserReturnsOk() {
-        userRepository.save(new User("admin", passwordEncoder.encode("password"), Role.ADMIN));
-        userRepository.save(new User("member", passwordEncoder.encode("password"), Role.MEMBER));
+        TestUser admin = userUtil.getUserWithRole(Role.ADMIN, port);
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
-                .header("Authorization", Util.getToken("admin", "password", port))
-                .delete("http://localhost:" + port + "/api/v1/users/member")
+                .header("Authorization", admin.token())
+                .delete("api/v1/users/" + member.getUsername())
                 .then()
                 .statusCode(200)
                 .body("message", equalTo("Successfully deleted user"));
 
-        Assertions.assertTrue(userRepository.findById("member").isEmpty());
+        Assertions.assertTrue(userRepository.findById(member.getUsername()).isEmpty());
     }
 
     @Test
     public void adminDeletesNonExistingUserReturnsNotFound() {
-        userRepository.save(new User("admin", passwordEncoder.encode("password"), Role.ADMIN));
+        TestUser admin = userUtil.getUserWithRole(Role.ADMIN, port);
 
         RestAssured.given()
-                .header("Authorization", Util.getToken("admin", "password", port))
-                .delete("http://localhost:" + port + "/api/v1/users/member")
+                .header("Authorization", admin.token())
+                .delete("/api/v1/users/member")
                 .then()
                 .statusCode(404)
                 .body("message", equalTo("User does not exist"));
@@ -63,62 +45,62 @@ public class DeleteUserTest {
 
     @Test
     public void memberDeletesUserReturnsUnauthorized() {
-        userRepository.save(new User("admin", passwordEncoder.encode("password"), Role.ADMIN));
-        userRepository.save(new User("member", passwordEncoder.encode("password"), Role.MEMBER));
+        TestUser admin = userUtil.getUserWithRole(Role.ADMIN, port);
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
-                .header("Authorization", Util.getToken("member", "password", port))
-                .delete("http://localhost:" + port + "/api/v1/users/admin")
+                .header(member.getAuthHeader())
+                .delete("/api/v1/users/" + admin.getUsername())
                 .then()
                 .statusCode(401);
     }
 
     @Test
     public void unauthorizedUserDeletesUserReturnsUnauthorized() {
-        userRepository.save(new User("member", passwordEncoder.encode("password"), Role.MEMBER));
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
-                .delete("http://localhost:" + port + "/api/v1/users/member")
+                .delete("/api/v1/users/" + member.getUsername())
                 .then()
                 .statusCode(401);
     }
 
     @Test
     public void unauthorizedUserDeletesItselfReturnsUnauthorized() {
-        userRepository.save(new User("member", passwordEncoder.encode("password"), Role.MEMBER));
+        userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
-                .delete("http://localhost:" + port + "/api/v1/users")
+                .delete("api/v1/users")
                 .then()
                 .statusCode(401);
     }
 
     @Test
     public void memberDeletesItselfReturnsOk() {
-        userRepository.save(new User("member", passwordEncoder.encode("password"), Role.MEMBER));
+        TestUser member = userUtil.getUserWithRole(Role.MEMBER, port);
 
         RestAssured.given()
-                .header("Authorization", Util.getToken("member", "password", port))
-                .delete("http://localhost:" + port + "/api/v1/users")
+                .header(member.getAuthHeader())
+                .delete("api/v1/users")
                 .then()
                 .statusCode(200)
                 .body("message", equalTo("Successfully deleted user"));
 
-        Assertions.assertTrue(userRepository.findById("member").isEmpty());
+        Assertions.assertTrue(userRepository.findById(member.getUsername()).isEmpty());
     }
 
     @Test
     public void adminDeletesItselfReturnsOk() {
-        userRepository.save(new User("admin", passwordEncoder.encode("password"), Role.ADMIN));
+        TestUser admin = userUtil.getUserWithRole(Role.ADMIN, port);
 
         RestAssured.given()
-                .header("Authorization", Util.getToken("admin", "password", port))
-                .delete("http://localhost:" + port + "/api/v1/users")
+                .header(admin.getAuthHeader())
+                .delete("/api/v1/users")
                 .then()
                 .statusCode(200)
                 .body("message", equalTo("Successfully deleted user"));
 
-        Assertions.assertTrue(userRepository.findById("member").isEmpty());
+        Assertions.assertTrue(userRepository.findById(admin.getUsername()).isEmpty());
     }
 
 }

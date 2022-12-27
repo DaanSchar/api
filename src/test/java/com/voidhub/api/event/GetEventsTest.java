@@ -1,72 +1,29 @@
 package com.voidhub.api.event;
 
-import com.voidhub.api.util.Util;
+import com.voidhub.api.BaseTest;
+import com.voidhub.api.util.*;
 import com.voidhub.api.entity.Event;
-import com.voidhub.api.repository.EventRepository;
-import com.voidhub.api.entity.Role;
-import com.voidhub.api.entity.User;
-import com.voidhub.api.repository.UserRepository;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-public class GetEventsTest {
+public class GetEventsTest extends BaseTest {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EventRepository eventRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    private String username;
-    private String password;
-
-    @Value("${local.server.port}")
-    private int port;
-
-    @BeforeEach
-    public void setUp() {
-        username = UUID.randomUUID().toString();
-        password = UUID.randomUUID().toString();
-
-        eventRepository.deleteAll();
-        userRepository.deleteAll();
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-    }
+    private @Autowired UserUtil userUtil;
+    private @Autowired EventUtil eventUtil;
 
     @AfterEach
     public void afterEach() {
-        eventRepository.deleteAll();
-        userRepository.deleteAll();
+        eventUtil.clearEvents();
     }
 
     @Test
     public void unauthenticatedRequest_GetAllEvents_ReturnsListOfEventsAndOk() {
-        User user = userRepository.save(User.builder()
-                .role(Role.ADMIN)
-                .password(passwordEncoder.encode(password))
-                .username(username)
-                .build()
-        );
-
-        Event event = saveEvent(user);
+        TestUser publisher = userUtil.getUserWithAuthority("event:write", port);
+        Event event = eventUtil.createAndSaveEvent(publisher.user());
 
         RestAssured.get("/api/v1/events")
                 .then()
@@ -77,37 +34,25 @@ public class GetEventsTest {
 
     @Test
     public void anyAuthenticatedUser_GetAllEvents_ReturnsListOfEventsAndOk() {
-        for (Role role : Role.values()) {
-            eventRepository.deleteAll();
-            User user = userRepository.save(User.builder()
-                    .role(role)
-                    .password(passwordEncoder.encode(password))
-                    .username(username)
-                    .build()
-            );
-
-            Event event = saveEvent(user);
+        for (TestUser user : userUtil.getUsersWithAnyRole(port)) {
+            Event event = eventUtil.createAndSaveEvent(user.user());
 
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", user.token())
                     .get("/api/v1/events")
                     .then()
                     .statusCode(200)
                     .body("size()", equalTo(1))
                     .body("[0].id", equalTo(event.getId().toString()));
+
+            eventUtil.clearEvents();
         }
     }
 
     @Test
     public void unauthenticatedUser_getsSingleEvent_ReturnsEventDTOAndOk() {
-        User user = userRepository.save(User.builder()
-                .role(Role.MEMBER)
-                .password(passwordEncoder.encode(password))
-                .username(username)
-                .build()
-        );
-
-        Event event = saveEvent(user);
+        TestUser publisher = userUtil.getUserWithAuthority("event:write",port);
+        Event event = eventUtil.createAndSaveEvent(publisher.user());
 
         RestAssured.get("/api/v1/events/" + event.getId())
                 .then()
@@ -119,24 +64,17 @@ public class GetEventsTest {
                 .body("createdAt", notNullValue())
                 .body("applicationDeadline", notNullValue())
                 .body("startingDate", notNullValue())
-                .body("publishedBy.username", equalTo(user.getUsername()));
+                .body("publishedBy.username", equalTo(publisher.user().getUsername()));
     }
 
     @Test
     public void anyAuthenticatedUser_getsSingleEvent_ReturnsEventDTOAndOk() {
-        for (Role role : Role.values()) {
-            eventRepository.deleteAll();
-            User user = userRepository.save(User.builder()
-                    .role(role)
-                    .password(passwordEncoder.encode(password))
-                    .username(username)
-                    .build()
-            );
+        TestUser publisher = userUtil.getUserWithAuthority("event:write", port);
+        Event event = eventUtil.createAndSaveEvent(publisher.user());
 
-            Event event = saveEvent(user);
-
+        for (TestUser user : userUtil.getUsersWithAnyRole(port)) {
             RestAssured.given()
-                    .header("Authorization", Util.getToken(username, password, port))
+                    .header("Authorization", user.token())
                     .get("/api/v1/events/" + event.getId())
                     .then()
                     .statusCode(200)
@@ -147,22 +85,8 @@ public class GetEventsTest {
                     .body("createdAt", notNullValue())
                     .body("applicationDeadline", notNullValue())
                     .body("startingDate", notNullValue())
-                    .body("publishedBy.username", equalTo(user.getUsername()));
+                    .body("publishedBy.username", equalTo(publisher.user().getUsername()));
         }
-    }
-
-    private Event saveEvent(User user) {
-        return eventRepository.save(new Event(
-                UUID.randomUUID(),
-                "title",
-                "shortDescription",
-                "fullDescription",
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                user
-        ));
     }
 
 }
