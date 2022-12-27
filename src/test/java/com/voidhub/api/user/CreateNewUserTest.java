@@ -42,6 +42,9 @@ public class CreateNewUserTest extends BaseTest {
         Assertions.assertEquals("username", user.getUsername());
         Assertions.assertTrue(passwordEncoder.matches("123validPassword!", user.getPassword()));
         Assertions.assertEquals(user.getRole(), Role.MEMBER);
+        Assertions.assertEquals(user.getUserInfo().getEmail(), "john.man@gmail.com");
+        Assertions.assertEquals(user.getUserInfo().getDiscordName(), "John#1111");
+        Assertions.assertEquals(user.getUserInfo().getMinecraftName(), "I_Always_Pvp");
     }
 
     @Test
