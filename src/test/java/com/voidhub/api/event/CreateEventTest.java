@@ -19,11 +19,6 @@ public class CreateEventTest extends BaseTest {
 
     private final String eventWriteAuth = "event:write";
 
-    @AfterEach
-    public void afterEach() {
-        eventUtil.clearEvents();
-    }
-
     @Test
     public void roleWithWriteEventAuthorityExists() {
         Assertions.assertTrue(Util.getRolesWithAuthority(eventWriteAuth).size() > 0);
@@ -53,7 +48,6 @@ public class CreateEventTest extends BaseTest {
             UUID id = eventRepository.findAll().get(0).getId();
 
             result.header("Location", equalTo("/api/v1/events/" + id));
-
             eventUtil.clearEvents();
         }
     }
