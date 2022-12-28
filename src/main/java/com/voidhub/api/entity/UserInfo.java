@@ -1,13 +1,15 @@
 package com.voidhub.api.entity;
 
+import com.voidhub.api.form.EventApplicationForm;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
-@Builder
+//@Builder
 public class UserInfo {
 
     @Id
@@ -23,8 +25,11 @@ public class UserInfo {
     @Column(nullable = false)
     private String minecraftName;
 
-//    @OneToOne(mappedBy = "userInfo")
-//    private User user;
+    @Column(nullable = false)
+    private boolean isVerified;
+
+    @ManyToMany(mappedBy = "applications")
+    private Set<Event> events;
 
     public UserInfo() {}
 
@@ -32,6 +37,19 @@ public class UserInfo {
         this.email = email;
         this.discordName = discordName;
         this.minecraftName = minecraftName;
+    }
+
+    public UserInfo(String email, String discordName, String minecraftName, boolean isVerified) {
+        this.email = email;
+        this.discordName = discordName;
+        this.minecraftName = minecraftName;
+        this.isVerified = isVerified;
+    }
+
+    public UserInfo(EventApplicationForm form) {
+        this.email = form.getEmail();
+        this.discordName = form.getDiscordName();
+        this.minecraftName = form.getMinecraftName();
     }
 
 }

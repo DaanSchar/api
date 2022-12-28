@@ -1,8 +1,7 @@
 package com.voidhub.api.service;
 
 import com.voidhub.api.dto.UserDto;
-import com.voidhub.api.entity.User;
-import com.voidhub.api.entity.UserInfo;
+import com.voidhub.api.entity.*;
 import com.voidhub.api.exceptions.EntityAlreadyExistsException;
 import com.voidhub.api.form.create.CreateUserForm;
 import com.voidhub.api.entity.Role;
@@ -51,8 +50,9 @@ public class UserService {
                 username,
                 passwordEncoder.encode(password),
                 Role.MEMBER,
-                new UserInfo(form.getEmail(), form.getDiscordName(), form.getMinecraftName())
+                new UserInfo(form.getEmail(), form.getDiscordName(), form.getMinecraftName(), true)
         );
+
         userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.OK).body(new Message("Successfully created user"));

@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
+@Builder
 public class Event {
 
     @Id
@@ -49,7 +51,14 @@ public class Event {
     @OneToOne(fetch = FetchType.EAGER, optional = false)
     private FileData image;
 
-    public Event() {}
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "events_userinfos",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "userinfo_id"))
+    private Set<UserInfo> applications;
+
+    public Event() {
+    }
 
     public Event(CreateEventForm form, User publishedBy, FileData image) {
         this.title = form.getTitle();
