@@ -84,7 +84,8 @@ public class UserUtil {
                         new UserInfo(
                                 username + "@gmail.com",
                                 username + "#0000",
-                                username + "_minecraft_player"
+                                username + "_minecraft_player",
+                                true
                         )
                 )
                 .build()

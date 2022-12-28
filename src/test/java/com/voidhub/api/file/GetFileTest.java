@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class GetFileTest extends BaseTest {
 
@@ -41,4 +42,13 @@ public class GetFileTest extends BaseTest {
                 .then()
                 .statusCode(200);
     }
+
+    @Test
+    public void getNonExistingFile() {
+        RestAssured
+                .get("/api/v1/files/" + UUID.randomUUID())
+                .then()
+                .statusCode(404);
+    }
+
 }

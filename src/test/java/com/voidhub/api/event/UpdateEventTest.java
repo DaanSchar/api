@@ -20,11 +20,6 @@ public class UpdateEventTest extends BaseTest {
 
     private final String eventWriteAuth = "event:write";
 
-    @AfterEach
-    public void afterEach() {
-        eventUtil.clearEvents();
-    }
-
     @Test
     public void rolesWithWriteEventAuthorityExists() {
         Assertions.assertTrue(Util.getRolesWithAuthority(eventWriteAuth).size() > 0);
@@ -73,8 +68,6 @@ public class UpdateEventTest extends BaseTest {
             Assertions.assertEquals(event.getPublishedBy().getUsername(), updatedEvent.getPublishedBy().getUsername());
             Assertions.assertEquals(event.getCreatedAt(), updatedEvent.getCreatedAt());
             Assertions.assertNotEquals(event.getUpdatedAt(), updatedEvent.getUpdatedAt());
-
-            eventUtil.clearEvents();
         }
     }
 
@@ -107,8 +100,6 @@ public class UpdateEventTest extends BaseTest {
                     .then()
                     .statusCode(403)
                     .body("message", equalTo("You did not publish this event"));
-
-            eventUtil.clearEvents();
         }
     }
 
@@ -127,7 +118,6 @@ public class UpdateEventTest extends BaseTest {
                     .statusCode(401);
 
             Assertions.assertEquals("title", eventRepository.findById(event.getId()).get().getTitle());
-            eventUtil.clearEvents();
         }
     }
 

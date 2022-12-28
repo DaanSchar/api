@@ -15,11 +15,6 @@ public class GetEventsTest extends BaseTest {
     private @Autowired UserUtil userUtil;
     private @Autowired EventUtil eventUtil;
 
-    @AfterEach
-    public void afterEach() {
-        eventUtil.clearEvents();
-    }
-
     @Test
     public void unauthenticatedRequest_GetAllEvents_ReturnsListOfEventsAndOk() {
         TestUser publisher = userUtil.getUserWithAuthority("event:write", port);
@@ -65,7 +60,7 @@ public class GetEventsTest extends BaseTest {
                 .body("applicationDeadline", notNullValue())
                 .body("startingDate", notNullValue())
                 .body("publishedBy.username", equalTo(publisher.user().getUsername()))
-                .body("imageLocation", notNullValue());
+                .body("imageId", notNullValue());
     }
 
     @Test
@@ -87,7 +82,7 @@ public class GetEventsTest extends BaseTest {
                     .body("applicationDeadline", notNullValue())
                     .body("startingDate", notNullValue())
                     .body("publishedBy.username", equalTo(publisher.user().getUsername()))
-                    .body("imageLocation", notNullValue());
+                    .body("imageId", notNullValue());
         }
     }
 

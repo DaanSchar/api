@@ -19,11 +19,6 @@ public class DeleteEventTest extends BaseTest {
 
     private final String eventWriteAuthority = "event:write";
 
-    @AfterEach
-    public void afterEach() {
-        eventUtil.clearEvents();
-    }
-
     @Test
     public void eventWriteAuthorityExists() {
         Assertions.assertTrue(Util.getRolesWithAuthority(eventWriteAuthority).size() > 0);

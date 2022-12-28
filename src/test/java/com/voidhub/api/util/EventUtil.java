@@ -23,18 +23,18 @@ public class EventUtil {
     }
 
     public Event createAndSaveEvent(User user) {
-        return eventRepository.save(new Event(
-                UUID.randomUUID(),
-                "title",
-                "shortDescription",
-                "fullDescription",
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                Util.getRandomFutureDate(),
-                user,
-                uploadTestImage()
-        ));
+        return eventRepository.save(Event.builder()
+                .createdAt(Util.getRandomFutureDate())
+                .applicationDeadline(Util.getRandomFutureDate())
+                .startingDate(Util.getRandomFutureDate())
+                .id(UUID.randomUUID())
+                .title("title")
+                .shortDescription("shortDescription")
+                .fullDescription("fullDescription")
+                .publishedBy(user)
+                .image(uploadTestImage())
+                .build()
+        );
     }
 
     public CreateEventForm getRandomValidEventForm() {

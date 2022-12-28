@@ -1,5 +1,6 @@
 package com.voidhub.api.util;
 
+import com.voidhub.api.form.EventApplicationForm;
 import com.voidhub.api.form.create.CreateEventForm;
 import com.voidhub.api.entity.Role;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,6 +41,14 @@ public class Util {
                 "\"applicationDeadline\": \"" + Util.formatDate(newEvent.getApplicationDeadline()) + "\", " +
                 "\"startingDate\": \"" + Util.formatDate(newEvent.getStartingDate()) + "\", " +
                 "\"imageId\": \"" + newEvent.getImageId() + "\"" +
+                "}";
+    }
+
+    public static String toBody(EventApplicationForm form) {
+        return "{" +
+                "\"email\": \"" + form.getEmail() + "\", " +
+                "\"discordName\": \"" + form.getDiscordName() + "\", " +
+                "\"minecraftName\": \"" + form.getDiscordName() + "\"" +
                 "}";
     }
 
