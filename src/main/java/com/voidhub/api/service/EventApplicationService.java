@@ -1,10 +1,8 @@
 package com.voidhub.api.service;
 
-import com.voidhub.api.entity.Event;
-import com.voidhub.api.entity.MinecraftUserInfo;
-import com.voidhub.api.entity.User;
-import com.voidhub.api.entity.UserInfo;
+import com.voidhub.api.entity.*;
 import com.voidhub.api.form.EventApplicationForm;
+import com.voidhub.api.repository.EventApplicationRepository;
 import com.voidhub.api.repository.EventRepository;
 import com.voidhub.api.repository.UserRepository;
 import com.voidhub.api.util.Message;
@@ -20,6 +18,7 @@ import java.util.UUID;
 public class EventApplicationService {
 
     private @Autowired EventRepository eventRepository;
+    private @Autowired EventApplicationRepository eventApplicationRepository;
     private @Autowired UserRepository userRepository;
     private @Autowired MojangService mojangService;
 
@@ -30,10 +29,15 @@ public class EventApplicationService {
         User user = userRepository.findById(username)
                 .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
+        EventApplication application = EventApplication.builder()
+                .userInfo(user.getUserInfo())
+                .event(event)
+                .build();
+        eventApplicationRepository.save(application);
+
         Set<UserInfo> applications = event.getApplications();
         applications.add(user.getUserInfo());
         event.setApplications(applications);
-
         eventRepository.save(event);
 
         return ResponseEntity.ok(new Message("Successfully applied to event"));
@@ -48,13 +52,20 @@ public class EventApplicationService {
         MinecraftUserInfo minecraftUserInfo = mojangService.getMinecraftUserInfo(form.getMinecraftName())
                 .orElseThrow(() -> new EntityNotFoundException("Minecraft user does not exist"));
 
-        applications.add(new UserInfo(
+        UserInfo userInfo = new UserInfo(
                 form.getEmail(),
                 form.getDiscordName(),
                 minecraftUserInfo
-        ));
-        event.setApplications(applications);
+        );
 
+        EventApplication application = EventApplication.builder()
+                .userInfo(userInfo)
+                .event(event)
+                .build();
+        eventApplicationRepository.save(application);
+
+        applications.add(userInfo);
+        event.setApplications(applications);
         eventRepository.save(event);
 
         return ResponseEntity.ok(new Message("Successfully applied to event. Please confirm your application by checking your email"));
