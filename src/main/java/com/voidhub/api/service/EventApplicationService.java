@@ -1,5 +1,6 @@
 package com.voidhub.api.service;
 
+import com.voidhub.api.dto.EventApplicationDto;
 import com.voidhub.api.entity.*;
 import com.voidhub.api.form.EventApplicationForm;
 import com.voidhub.api.repository.EventApplicationRepository;
@@ -11,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -35,19 +36,12 @@ public class EventApplicationService {
                 .build();
         eventApplicationRepository.save(application);
 
-        Set<UserInfo> applications = event.getApplications();
-        applications.add(user.getUserInfo());
-        event.setApplications(applications);
-        eventRepository.save(event);
-
         return ResponseEntity.ok(new Message("Successfully applied to event"));
     }
 
     public ResponseEntity<Message> apply(UUID eventId, EventApplicationForm form) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event does not exist"));
-
-        Set<UserInfo> applications = event.getApplications();
 
         MinecraftUserInfo minecraftUserInfo = mojangService.getMinecraftUserInfo(form.getMinecraftName())
                 .orElseThrow(() -> new EntityNotFoundException("Minecraft user does not exist"));
@@ -64,11 +58,17 @@ public class EventApplicationService {
                 .build();
         eventApplicationRepository.save(application);
 
-        applications.add(userInfo);
-        event.setApplications(applications);
-        eventRepository.save(event);
-
         return ResponseEntity.ok(new Message("Successfully applied to event. Please confirm your application by checking your email"));
+    }
+
+    public List<EventApplicationDto> getEventApplicationsByEventId(UUID eventId) {
+        return eventApplicationRepository.getEventApplicationsByEvent_Id(eventId).stream().map(application -> {
+            EventApplicationDto dto = new EventApplicationDto();
+            dto.setEventId(application.getEvent().getId());
+            dto.setUserInfo(application.getUserInfo());
+            dto.setAccepted(application.isAccepted());
+            return dto;
+        }).toList();
     }
 
 }

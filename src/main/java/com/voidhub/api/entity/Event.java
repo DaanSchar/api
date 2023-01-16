@@ -7,7 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -52,12 +51,6 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private FileData image;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "events_userinfos",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "userinfo_id"))
-    private Set<UserInfo> applications;
 
     public Event() {
     }

@@ -9,7 +9,6 @@ import com.voidhub.api.util.Message;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ public class EventService {
     private @Autowired EventRepository eventRepository;
     private @Autowired FileRepository fileRepository;
     private @Autowired UserRepository userRepository;
-//    private @Autowired Environment environment;
+    private @Autowired EventApplicationRepository eventApplicationRepository;
 
     @Value("${server.address}")
     private String serverAddress;
@@ -110,6 +109,7 @@ public class EventService {
     private EventDto mapToEventDto(Event event) {
         var eventDto = new EventDto(event);
         eventDto.setImage("http://" + serverAddress + ":" + serverPort + "/api/v1/files/" + event.getImage().getId());
+        eventDto.setTotalApplications(eventApplicationRepository.getEventApplicationsByEvent_Id(event.getId()).size());
         return eventDto;
     }
 }

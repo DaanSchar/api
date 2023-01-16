@@ -1,7 +1,6 @@
 package com.voidhub.api.dto;
 
 import com.voidhub.api.entity.Event;
-import com.voidhub.api.entity.UserInfo;
 import lombok.Data;
 
 import java.util.Date;
@@ -21,7 +20,6 @@ public class EventDto {
         this.publishedBy = new UserDto(event.getPublishedBy());
         this.updatedAt = event.getUpdatedAt();
         this.image = event.getImage().getId().toString();
-        this.totalApplications = (int) event.getApplications().stream().filter(UserInfo::isVerified).count();
     }
 
     //TODO return image url instead of id

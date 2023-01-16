@@ -1,18 +1,18 @@
 package com.voidhub.api.controller;
 
+import com.voidhub.api.dto.EventApplicationDto;
 import com.voidhub.api.form.EventApplicationForm;
 import com.voidhub.api.service.EventApplicationService;
 import com.voidhub.api.util.Message;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -32,6 +32,13 @@ public class EventApplicationController {
             @Valid @RequestBody EventApplicationForm form
     ) {
         return eventApplicationService.apply(eventId, form);
+    }
+
+    @GetMapping("{event_id}/applications")
+    @PreAuthorize("hasAuthority('event:write')")
+    @ResponseBody
+    public List<EventApplicationDto> getApplications(@PathVariable(name = "event_id") UUID eventId) {
+        return eventApplicationService.getEventApplicationsByEventId(eventId);
     }
 
 

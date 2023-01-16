@@ -1,10 +1,7 @@
 package com.voidhub.api.entity;
 
-import com.voidhub.api.form.EventApplicationForm;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Set;
 
 @Entity
 @Getter
@@ -27,9 +24,6 @@ public class UserInfo {
 
     @Column(nullable = false)
     private boolean isVerified;
-
-    @ManyToMany(mappedBy = "applications")
-    private Set<Event> events;
 
     public UserInfo() {}
 
