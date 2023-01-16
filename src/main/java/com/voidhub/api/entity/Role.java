@@ -26,7 +26,8 @@ public enum Role {
             "user:read",
             "user:write",
             "event:write",
-            "file:write"
+            "file:write",
+            "minecraft_server:write"
     );
 
     private final List<SimpleGrantedAuthority> authorities;
