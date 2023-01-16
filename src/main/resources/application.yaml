@@ -13,6 +13,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         forma_sql: true
 
+
 application:
   jwt:
     secretKey: securesecuresecuresecuresecuresecuresecuresecuresecsecuresecuresecuresecuresecuresecuresecuresecuresecure
@@ -20,3 +21,7 @@ application:
     tokenExpirationAfterDays: 14
   filesystem:
     path: C:\Users\Daan\WebstormProjects\void-hub\api\files
+
+server:
+  port: 8080
+  address: localhost
