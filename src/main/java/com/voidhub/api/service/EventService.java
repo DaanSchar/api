@@ -1,15 +1,15 @@
 package com.voidhub.api.service;
 
 import com.voidhub.api.dto.EventDto;
-import com.voidhub.api.entity.Event;
-import com.voidhub.api.entity.FileData;
-import com.voidhub.api.entity.User;
+import com.voidhub.api.entity.*;
 import com.voidhub.api.form.create.CreateEventForm;
 import com.voidhub.api.form.update.UpdateEventForm;
 import com.voidhub.api.repository.*;
 import com.voidhub.api.util.Message;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -23,16 +23,23 @@ public class EventService {
     private @Autowired EventRepository eventRepository;
     private @Autowired FileRepository fileRepository;
     private @Autowired UserRepository userRepository;
+//    private @Autowired Environment environment;
+
+    @Value("${server.address}")
+    private String serverAddress;
+
+    @Value("${server.port}")
+    private String serverPort;
 
     public List<EventDto> getEvents() {
         return eventRepository.findAll(Sort.by("startingDate"))
                 .stream()
-                .map(EventDto::new)
+                .map(this::mapToEventDto)
                 .toList();
     }
 
     public Optional<EventDto> getEvent(UUID eventId) {
-        return eventRepository.findById(eventId).map(EventDto::new);
+        return eventRepository.findById(eventId).map(this::mapToEventDto);
     }
 
     public ResponseEntity<Message> createNewEvent(CreateEventForm form, String username) throws URISyntaxException {
@@ -98,5 +105,11 @@ public class EventService {
                 .orElseThrow(() -> new EntityNotFoundException("User does not exist"));
 
         return event.getPublishedBy().equals(user);
+    }
+
+    private EventDto mapToEventDto(Event event) {
+        var eventDto = new EventDto(event);
+        eventDto.setImage("http://" + serverAddress + ":" + serverPort + "/api/v1/files/" + event.getImage().getId());
+        return eventDto;
     }
 }

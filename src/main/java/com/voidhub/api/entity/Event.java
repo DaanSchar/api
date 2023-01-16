@@ -18,6 +18,8 @@ import java.util.UUID;
 @Builder
 public class Event {
 
+    //TODO Add modpack
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,10 +27,10 @@ public class Event {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String shortDescription;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10000)
     private String fullDescription;
 
     @Column(nullable = false)
@@ -48,7 +50,7 @@ public class Event {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private User publishedBy;
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private FileData image;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

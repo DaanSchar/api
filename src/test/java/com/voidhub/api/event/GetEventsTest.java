@@ -60,7 +60,7 @@ public class GetEventsTest extends BaseTest {
                 .body("applicationDeadline", notNullValue())
                 .body("startingDate", notNullValue())
                 .body("publishedBy.username", equalTo(publisher.user().getUsername()))
-                .body("imageId", notNullValue());
+                .body("image", notNullValue());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class GetEventsTest extends BaseTest {
                     .body("applicationDeadline", notNullValue())
                     .body("startingDate", notNullValue())
                     .body("publishedBy.username", equalTo(publisher.user().getUsername()))
-                    .body("imageId", notNullValue());
+                    .body("image", notNullValue());
         }
     }
 
