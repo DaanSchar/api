@@ -23,11 +23,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MojangService mojangService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MojangService mojangService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mojangService = mojangService;
     }
 
     public List<UserDto> getUsers() {
@@ -46,15 +48,18 @@ public class UserService {
             throw new EntityAlreadyExistsException("Username already exists");
         }
 
+        MinecraftUserInfo minecraftUserInfo = mojangService
+                .getMinecraftUserInfo(form.getMinecraftName())
+                .orElseThrow(() -> new EntityNotFoundException("Minecraft user does not exist"));
+
         User user = new User(
                 username,
                 passwordEncoder.encode(password),
                 Role.MEMBER,
-                new UserInfo(form.getEmail(), form.getDiscordName(), form.getMinecraftName(), true)
+                new UserInfo(form.getEmail(), form.getDiscordName(), minecraftUserInfo, true)
         );
 
         userRepository.save(user);
-
         return ResponseEntity.status(HttpStatus.OK).body(new Message("Successfully created user"));
     }
 

@@ -32,7 +32,7 @@ public class ApplyToEventTest extends BaseTest {
                     .body("message", equalTo("Successfully applied to event"));
         }
 
-        Event queriedEvent = eventRepository.findById(event.getId()).get();
+        Event queriedEvent = eventRepository.findById(event.getId()).orElseThrow();
         Assertions.assertEquals(Role.values().length, queriedEvent.getApplications().size());
     }
 
@@ -44,7 +44,7 @@ public class ApplyToEventTest extends BaseTest {
         RestAssured.given()
                 .contentType("application/json")
                 .body(Util.toBody(
-                        new EventApplicationForm("John@Gmail.com", "Doe#0001", "epic_pvper"))
+                        new EventApplicationForm("John@Gmail.com", "Doe#0001", "Synthesyzer"))
                 )
                 .post("api/v1/events/" + event.getId() + "/apply_without_account")
                 .then()
@@ -55,7 +55,7 @@ public class ApplyToEventTest extends BaseTest {
                         )
                 );
 
-        Event queriedEvent = eventRepository.findById(event.getId()).get();
+        Event queriedEvent = eventRepository.findById(event.getId()).orElseThrow();
         Assertions.assertEquals(1, queriedEvent.getApplications().size());
     }
 

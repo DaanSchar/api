@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-//@Builder
+@Table(name = "userinfos")
 public class UserInfo {
 
     @Id
@@ -22,8 +22,8 @@ public class UserInfo {
     @Column(nullable = false)
     private String discordName;
 
-    @Column(nullable = false)
-    private String minecraftName;
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    private MinecraftUserInfo minecraftUserInfo;
 
     @Column(nullable = false)
     private boolean isVerified;
@@ -33,23 +33,17 @@ public class UserInfo {
 
     public UserInfo() {}
 
-    public UserInfo(String email, String discordName, String minecraftName) {
+    public UserInfo(String email, String discordName, MinecraftUserInfo minecraftUserInfo) {
         this.email = email;
         this.discordName = discordName;
-        this.minecraftName = minecraftName;
+        this.minecraftUserInfo = minecraftUserInfo;
     }
 
-    public UserInfo(String email, String discordName, String minecraftName, boolean isVerified) {
+    public UserInfo(String email, String discordName, MinecraftUserInfo minecraftUserInfo, boolean isVerified) {
         this.email = email;
         this.discordName = discordName;
-        this.minecraftName = minecraftName;
+        this.minecraftUserInfo = minecraftUserInfo;
         this.isVerified = isVerified;
-    }
-
-    public UserInfo(EventApplicationForm form) {
-        this.email = form.getEmail();
-        this.discordName = form.getDiscordName();
-        this.minecraftName = form.getMinecraftName();
     }
 
 }

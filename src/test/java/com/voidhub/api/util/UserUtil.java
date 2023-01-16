@@ -1,5 +1,6 @@
 package com.voidhub.api.util;
 
+import com.voidhub.api.entity.MinecraftUserInfo;
 import com.voidhub.api.entity.Role;
 import com.voidhub.api.entity.User;
 import com.voidhub.api.entity.UserInfo;
@@ -84,7 +85,7 @@ public class UserUtil {
                         new UserInfo(
                                 username + "@gmail.com",
                                 username + "#0000",
-                                username + "_minecraft_player",
+                                new MinecraftUserInfo(UUID.randomUUID(), username),
                                 true
                         )
                 )

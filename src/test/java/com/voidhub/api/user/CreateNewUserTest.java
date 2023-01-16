@@ -37,14 +37,14 @@ public class CreateNewUserTest extends BaseTest {
                 .body("message", equalTo("Successfully created user"))
                 .statusCode(200);
 
-        User user = userRepository.findById("username").get();
+        User user = userRepository.findById("username").orElseThrow();
 
         Assertions.assertEquals("username", user.getUsername());
         Assertions.assertTrue(passwordEncoder.matches("123validPassword!", user.getPassword()));
         Assertions.assertEquals(user.getRole(), Role.MEMBER);
         Assertions.assertEquals(user.getUserInfo().getEmail(), "john.man@gmail.com");
         Assertions.assertEquals(user.getUserInfo().getDiscordName(), "John#1111");
-        Assertions.assertEquals(user.getUserInfo().getMinecraftName(), "I_Always_Pvp");
+        Assertions.assertEquals(user.getUserInfo().getMinecraftUserInfo().getName(), "I_Always_PvP");
     }
 
     @Test
@@ -121,7 +121,7 @@ public class CreateNewUserTest extends BaseTest {
                 " \"password\": \"" + password + "\"," +
                 "\"discordName\": \"John#1111\"," +
                 "\"email\": \"john.man@gmail.com\"," +
-                "\"minecraftName\": \"I_Always_Pvp\"" +
+                "\"minecraftName\": \"I_Always_PvP\"" +
                 "}";
     }
 

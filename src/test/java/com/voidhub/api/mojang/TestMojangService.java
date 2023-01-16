@@ -12,10 +12,10 @@ public class TestMojangService extends BaseTest {
 
     @Test
     public void testMojangServiceForExistingUsers() {
-        Assertions.assertTrue(mojangService.isExistingMinecraftUser("Synthesyzer"));
-        Assertions.assertTrue(mojangService.isExistingMinecraftUser("_Tony_"));
-        Assertions.assertTrue(mojangService.isExistingMinecraftUser("Riboto"));
-        Assertions.assertFalse(mojangService.isExistingMinecraftUser("NonExistingUserThisNameShouldDefinitelyNotExist"));
+        Assertions.assertFalse(mojangService.getMinecraftUserInfo("Synthesyzer").isEmpty());
+        Assertions.assertFalse(mojangService.getMinecraftUserInfo("_Tony_").isEmpty());
+        Assertions.assertFalse(mojangService.getMinecraftUserInfo("Riboto").isEmpty());
+        Assertions.assertTrue(mojangService.getMinecraftUserInfo("NonExistingUserThisNameShouldDefinitelyNotExist").isEmpty());
     }
 
 }

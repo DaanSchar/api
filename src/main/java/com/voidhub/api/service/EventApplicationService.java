@@ -1,6 +1,7 @@
 package com.voidhub.api.service;
 
 import com.voidhub.api.entity.Event;
+import com.voidhub.api.entity.MinecraftUserInfo;
 import com.voidhub.api.entity.User;
 import com.voidhub.api.entity.UserInfo;
 import com.voidhub.api.form.EventApplicationForm;
@@ -20,6 +21,7 @@ public class EventApplicationService {
 
     private @Autowired EventRepository eventRepository;
     private @Autowired UserRepository userRepository;
+    private @Autowired MojangService mojangService;
 
     public ResponseEntity<Message> apply(UUID eventId, String username) {
         Event event = eventRepository.findById(eventId)
@@ -43,7 +45,14 @@ public class EventApplicationService {
 
         Set<UserInfo> applications = event.getApplications();
 
-        applications.add(new UserInfo(form));
+        MinecraftUserInfo minecraftUserInfo = mojangService.getMinecraftUserInfo(form.getMinecraftName())
+                .orElseThrow(() -> new EntityNotFoundException("Minecraft user does not exist"));
+
+        applications.add(new UserInfo(
+                form.getEmail(),
+                form.getDiscordName(),
+                minecraftUserInfo
+        ));
         event.setApplications(applications);
 
         eventRepository.save(event);
