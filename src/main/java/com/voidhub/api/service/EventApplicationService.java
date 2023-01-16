@@ -9,6 +9,7 @@ import com.voidhub.api.repository.UserRepository;
 import com.voidhub.api.util.Message;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,12 @@ public class EventApplicationService {
                 .userInfo(user.getUserInfo())
                 .event(event)
                 .build();
-        eventApplicationRepository.save(application);
+
+        try {
+            eventApplicationRepository.save(application);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Message("You have already applied to this event"));
+        }
 
         return ResponseEntity.ok(new Message("Successfully applied to event"));
     }

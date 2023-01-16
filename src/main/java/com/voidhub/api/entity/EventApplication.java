@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "event_applications")
+@Table(name = "event_applications", uniqueConstraints = { @UniqueConstraint(columnNames = { "event_id", "user_info_id" }) })
+
 @Getter
 @Setter
 @Builder

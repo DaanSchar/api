@@ -10,6 +10,7 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
 import static org.hamcrest.Matchers.*;
 
@@ -91,6 +92,28 @@ public class ApplyToEventTest extends BaseTest {
                 .then()
                 .statusCode(200)
                 .body("size()", is(Role.values().length));
+    }
+
+    @Test
+    public void userCantApplyTwice() {
+        TestUser publisher = userUtil.getUsersWithAuthority("event:write", port).get(0);
+        Event event = eventUtil.createAndSaveEvent(publisher.user());
+
+        TestUser user = userUtil.getUsersWithAnyRole(port).get(0);
+
+        RestAssured.given()
+                .header(user.getAuthHeader())
+                .post("api/v1/events/" + event.getId() + "/apply")
+                .then()
+                .statusCode(200)
+                .body("message", equalTo("Successfully applied to event"));
+
+        RestAssured.given()
+                .header(user.getAuthHeader())
+                .post("api/v1/events/" + event.getId() + "/apply")
+                .then()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .body("message", equalTo("You have already applied to this event"));
     }
 
 
